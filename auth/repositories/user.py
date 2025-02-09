@@ -22,6 +22,10 @@ class UserRepository(BaseRepository[User], UUIDRepositoryMixin[User]):
         )
         return await self.get_one_or_none(statement)
 
+    async def get_by_email(self, email: str) -> User | None:
+        statement = select(User).where(User.email == email)
+        return await self.get_one_or_none(statement)
+
     async def get_one_by_tenant(self, tenant: UUID4) -> User | None:
         statement = (
             select(User)

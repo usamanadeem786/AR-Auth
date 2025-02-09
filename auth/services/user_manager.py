@@ -99,8 +99,8 @@ class UserManager:
 
         return user
 
-    async def get_by_email(self, user_email: str, tenant: UUID4) -> User:
-        user = await self.user_repository.get_by_email_and_tenant(user_email, tenant)
+    async def get_by_email(self, user_email: str, tenant: UUID4 | None = None) -> User:
+        user = await self.user_repository.get_by_email(user_email)
 
         if user is None:
             raise UserDoesNotExistError()
@@ -117,7 +117,7 @@ class UserManager:
         await self.validate_password(user_create.password, user_create)
 
         try:
-            await self.get_by_email(user_create.email, tenant)
+            await self.get_by_email(user_create.email)
             raise UserAlreadyExistsError()  # noqa: TRY301
         except UserDoesNotExistError:
             pass
@@ -158,7 +158,7 @@ class UserManager:
 
         if user.email != email:
             try:
-                await self.get_by_email(email, user.tenant_id)
+                await self.get_by_email(email)
                 raise UserAlreadyExistsError()  # noqa: TRY301
             except UserDoesNotExistError:
                 pass
@@ -379,7 +379,7 @@ class UserManager:
         self, email: str, password: str, tenant: UUID4
     ) -> User | None:
         try:
-            user = await self.get_by_email(email, tenant)
+            user = await self.get_by_email(email)
         except UserDoesNotExistError:
             # Run the hasher to mitigate timing attack
             # Inspired from Django: https://code.djangoproject.com/ticket/20760
@@ -419,7 +419,7 @@ class UserManager:
     ) -> User:
         if email is not None and user.email != email:
             try:
-                await self.get_by_email(email, user.tenant_id)
+                await self.get_by_email(email)
                 raise UserAlreadyExistsError()  # noqa: TRY301
             except UserDoesNotExistError:
                 user.email = email

@@ -3,7 +3,6 @@ from typing import TYPE_CHECKING, Any, Optional, Self
 from pydantic import UUID4
 from sqlalchemy import Boolean, ForeignKey, String, event
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy.sql.schema import UniqueConstraint
 
 from auth.models.base import Base
 from auth.models.generics import GUID, CreatedUpdatedAt, UUIDModel
@@ -16,10 +15,13 @@ if TYPE_CHECKING:
 
 class User(UUIDModel, CreatedUpdatedAt, Base):
     __tablename__ = "users"
-    __table_args__ = (UniqueConstraint("email"),)
 
-    email: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
-    email_lower: Mapped[str] = mapped_column(String(320), index=True, nullable=False)
+    email: Mapped[str] = mapped_column(
+        String(length=320), index=True, nullable=False, unique=True
+    )
+    email_lower: Mapped[str] = mapped_column(
+        String(320), index=True, nullable=False, unique=True
+    )
     email_verified: Mapped[bool] = mapped_column(
         Boolean, index=True, default=False, nullable=False
     )
