@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
 class User(UUIDModel, CreatedUpdatedAt, Base):
     __tablename__ = "users"
-    __table_args__ = (UniqueConstraint("email", "tenant_id"),)
+    __table_args__ = (UniqueConstraint("email"),)
 
     email: Mapped[str] = mapped_column(String(length=320), index=True, nullable=False)
     email_lower: Mapped[str] = mapped_column(String(320), index=True, nullable=False)
