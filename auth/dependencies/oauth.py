@@ -42,7 +42,7 @@ async def get_optional_login_session_with_tenant_query(
         return None
 
     login_session = await login_session_repository.get_by_token(token, fresh=False)
-    if login_session is None or login_session.client.tenant_id != tenant.id:
+    if login_session is None:
         raise OAuthException(
             OAuthError.get_invalid_session(_("Invalid login session.")),
             oauth_providers=oauth_providers,
@@ -121,10 +121,7 @@ async def get_optional_login_session(
         return None
 
     login_session = await login_session_repository.get_by_token(token)
-    if (
-        login_session is None
-        or login_session.client.tenant_id != oauth_session.tenant_id
-    ):
+    if login_session is None:
         raise OAuthException(
             OAuthError.get_invalid_session(_("Invalid login session.")), fatal=True
         )
