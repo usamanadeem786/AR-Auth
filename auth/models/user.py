@@ -32,7 +32,10 @@ class User(UUIDModel, CreatedUpdatedAt, Base):
     tenant: Mapped[Tenant] = relationship("Tenant")
 
     user_field_values: Mapped[list["UserFieldValue"]] = relationship(
-        "UserFieldValue", back_populates="user", cascade="all, delete", lazy="selectin"
+        "UserFieldValue",
+        back_populates="user",
+        cascade="all, delete",
+        lazy="selectin",
     )
 
     def __repr__(self) -> str:
@@ -62,6 +65,34 @@ class User(UUIDModel, CreatedUpdatedAt, Base):
             "email_verified": self.email_verified,
             "is_active": self.is_active,
             "tenant_id": str(self.tenant_id),
+            "roles": {
+                "default": [
+                    {
+                        "name": str(role.display_name),
+                        "permissions": [
+                            {
+                                "name": str(permission.name),
+                                "codename": str(permission.codename),
+                            }
+                            for permission in role.permissions
+                        ],
+                    }
+                    for role in self.tenant.default_roles
+                ],
+                # "user": [
+                #     {
+                #         "name": str(user_role.role),
+                #         # "permissions": [
+                #         #     {
+                #         #         "name": str(permission.name),
+                #         #         "codename": str(permission.codename),
+                #         #     }
+                #         #     for permission in user_role.role.permissions
+                #         # ],
+                #     }
+                #     for user_role in self.user_roles
+                # ],
+            },
             "fields": fields,
         }
 

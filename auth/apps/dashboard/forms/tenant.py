@@ -38,6 +38,14 @@ class BaseTenantForm(CSRFBaseForm):
         validate_choice=False,
         description="OAuth Providers users should be allowed to use to login.",
     )
+    default_roles = ComboboxSelectMultipleField(
+        "Default Roles",
+        query_endpoint_path="/admin/access-control/roles/",
+        label_attr="display_name",
+        choices=[],
+        validate_choice=False,
+        description="Roles that will be assigned to users when they register.",
+    )
 
 
 class TenantCreateForm(BaseTenantForm):

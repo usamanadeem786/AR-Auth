@@ -2,49 +2,36 @@ from fastapi import APIRouter, Depends, Header, HTTPException, Request, status
 from fastapi.responses import RedirectResponse
 
 from auth import schemas
-from auth.apps.dashboard.dependencies import (
-    BaseContext,
-    DatatableColumn,
-    DatatableQueryParameters,
-    DatatableQueryParametersGetter,
-    get_base_context,
-)
-from auth.apps.dashboard.forms.tenant import (
-    TenantCreateForm,
-    TenantEmailForm,
-    TenantUpdateForm,
-)
+from auth.apps.dashboard.dependencies import (BaseContext, DatatableColumn,
+                                              DatatableQueryParameters,
+                                              DatatableQueryParametersGetter,
+                                              get_base_context)
+from auth.apps.dashboard.forms.tenant import (TenantCreateForm,
+                                              TenantEmailForm,
+                                              TenantUpdateForm)
 from auth.apps.dashboard.responses import HXRedirectResponse
-from auth.dependencies.admin_authentication import is_authenticated_admin_session
+from auth.dependencies.admin_authentication import \
+    is_authenticated_admin_session
 from auth.dependencies.email_provider import get_email_provider
 from auth.dependencies.logger import get_audit_logger
 from auth.dependencies.pagination import PaginatedObjects
 from auth.dependencies.repositories import get_repository
-from auth.dependencies.tenant import get_paginated_tenants, get_tenant_by_id_or_404
+from auth.dependencies.tenant import (get_paginated_tenants,
+                                      get_tenant_by_id_or_404)
 from auth.dependencies.tenant_email_domain import get_tenant_email_domain
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.forms import FormHelper
 from auth.logger import AuditLogger
-from auth.models import AuditLogMessage, Client, OAuthProvider, Tenant
-from auth.repositories import (
-    ClientRepository,
-    OAuthProviderRepository,
-    TenantRepository,
-    ThemeRepository,
-    UserRepository,
-)
+from auth.models import AuditLogMessage, Client, OAuthProvider, Role, Tenant
+from auth.repositories import (ClientRepository, OAuthProviderRepository,
+                               RoleRepository, TenantRepository,
+                               ThemeRepository, UserRepository)
 from auth.services.email import EmailProvider
 from auth.services.tenant_email_domain import (
-    DomainAuthenticationNotImplementedError,
-    TenantEmailDomain,
-    TenantEmailDomainError,
-)
-from auth.services.webhooks.models import (
-    ClientCreated,
-    TenantCreated,
-    TenantDeleted,
-    TenantUpdated,
-)
+    DomainAuthenticationNotImplementedError, TenantEmailDomain,
+    TenantEmailDomainError)
+from auth.services.webhooks.models import (ClientCreated, TenantCreated,
+                                           TenantDeleted, TenantUpdated)
 from auth.settings import settings
 from auth.templates import templates
 
@@ -232,6 +219,7 @@ async def create_tenant(
     oauth_provider_repository: OAuthProviderRepository = Depends(
         get_repository(OAuthProviderRepository)
     ),
+    role_repository: RoleRepository = Depends(get_repository(RoleRepository)),
     list_context=Depends(get_list_context),
     context: BaseContext = Depends(get_base_context),
     audit_logger: AuditLogger = Depends(get_audit_logger),
@@ -272,6 +260,18 @@ async def create_tenant(
             oauth_providers.append(oauth_provider)
             form.oauth_providers.data = oauth_providers
 
+        default_roles_ids = form.data["default_roles"]
+        default_roles: list[Role] = []
+        for default_role_id in default_roles_ids:
+            role = await role_repository.get_by_id(default_role_id)
+            if role is None:
+                form.default_roles.errors.append("Unknown role.")
+                return await form_helper.get_error_response(
+                    "Unknown role.", "unknown_role"
+                )
+            default_roles.append(role)
+            form.default_roles.data = default_roles
+
         form.populate_obj(tenant)
         tenant.slug = await repository.get_available_slug(tenant.name)
         tenant = await repository.create(tenant)
@@ -310,6 +310,7 @@ async def update_tenant(
     oauth_provider_repository: OAuthProviderRepository = Depends(
         get_repository(OAuthProviderRepository)
     ),
+    role_repository: RoleRepository = Depends(get_repository(RoleRepository)),
     list_context=Depends(get_list_context),
     context: BaseContext = Depends(get_base_context),
     audit_logger: AuditLogger = Depends(get_audit_logger),
@@ -326,6 +327,10 @@ async def update_tenant(
     form.oauth_providers.choices = [
         (oauth_provider.id, oauth_provider.display_name)
         for oauth_provider in tenant.oauth_providers
+    ]
+
+    form.default_roles.choices = [
+        (role.id, role.display_name) for role in tenant.default_roles
     ]
 
     if await form_helper.is_submitted_and_valid():
@@ -352,6 +357,19 @@ async def update_tenant(
             tenant.oauth_providers.append(oauth_provider)
 
         del form.oauth_providers
+
+        tenant.default_roles = []
+        for role_id in form.data["default_roles"]:
+            role = await role_repository.get_by_id(role_id)
+            if role is None:
+                form.default_roles.errors.append("Unknown role.")
+                return await form_helper.get_error_response(
+                    "Unknown role.", "unknown_role"
+                )
+            tenant.default_roles.append(role)
+
+        del form.default_roles
+
         form.populate_obj(tenant)
 
         await repository.update(tenant)

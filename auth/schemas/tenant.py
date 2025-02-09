@@ -2,6 +2,7 @@ from pydantic import UUID4, HttpUrl
 
 from auth.schemas.generics import BaseModel, CreatedUpdatedAt, UUIDSchema
 from auth.schemas.oauth_provider import OAuthProviderEmbedded
+from auth.schemas.role import RoleEmbedded
 
 
 class TenantCreate(BaseModel):
@@ -11,6 +12,7 @@ class TenantCreate(BaseModel):
     logo_url: HttpUrl | None = None
     application_url: HttpUrl | None = None
     oauth_providers: list[UUID4] | None = None
+    default_roles: list[UUID4] | None = None
 
 
 class TenantUpdate(BaseModel):
@@ -20,6 +22,7 @@ class TenantUpdate(BaseModel):
     logo_url: HttpUrl | None = None
     application_url: HttpUrl | None = None
     oauth_providers: list[UUID4] | None = None
+    default_roles: list[UUID4] | None = None
 
 
 class BaseTenant(UUIDSchema, CreatedUpdatedAt):
@@ -34,6 +37,7 @@ class BaseTenant(UUIDSchema, CreatedUpdatedAt):
 
 class Tenant(BaseTenant):
     oauth_providers: list[OAuthProviderEmbedded]
+    default_roles: list[RoleEmbedded]
 
 
 class TenantEmbedded(BaseTenant):

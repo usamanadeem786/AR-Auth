@@ -14,3 +14,6 @@ class RoleRepository(BaseRepository[Role], UUIDRepositoryMixin[Role]):
     async def get_by_name(self, name: str) -> Role | None:
         statement = select(Role).where(Role.name == name)
         return await self.get_one_or_none(statement)
+
+    async def all_by_name(self) -> list[Role]:
+        return await self.list(select(Role).order_by(Role.name))

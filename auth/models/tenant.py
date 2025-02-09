@@ -11,8 +11,10 @@ from starlette.routing import Router
 from auth.crypto.jwk import generate_signature_jwk_string, load_jwk
 from auth.models.base import Base, get_prefixed_tablename
 from auth.models.email_domain import EmailDomain
-from auth.models.generics import GUID, CreatedUpdatedAt, PydanticUrlString, UUIDModel
+from auth.models.generics import (GUID, CreatedUpdatedAt, PydanticUrlString,
+                                  UUIDModel)
 from auth.models.oauth_provider import OAuthProvider
+from auth.models.role import Role
 from auth.models.theme import Theme
 from auth.settings import settings
 
@@ -29,6 +31,21 @@ TenantOAuthProvider = Table(
         ForeignKey(
             f"{get_prefixed_tablename('oauth_providers')}.id", ondelete="CASCADE"
         ),
+        primary_key=True,
+    ),
+)
+
+TenantDefaultRole = Table(
+    get_prefixed_tablename("tenants_default_roles"),
+    Base.metadata,
+    Column(
+        "tenant_id",
+        ForeignKey(f"{get_prefixed_tablename('tenants')}.id", ondelete="CASCADE"),
+        primary_key=True,
+    ),
+    Column(
+        "role_id",
+        ForeignKey(f"{get_prefixed_tablename('roles')}.id", ondelete="CASCADE"),
         primary_key=True,
     ),
 )
@@ -74,6 +91,10 @@ class Tenant(UUIDModel, CreatedUpdatedAt, Base):
         GUID, ForeignKey(EmailDomain.id, ondelete="SET NULL"), nullable=True
     )
     email_domain: Mapped[EmailDomain | None] = relationship("EmailDomain")
+
+    default_roles: Mapped[list[Role]] = relationship(
+        "Role", secondary=TenantDefaultRole, lazy="selectin"
+    )
 
     def get_sign_jwk(self) -> jwk.JWK:
         return load_jwk(self.sign_jwk)

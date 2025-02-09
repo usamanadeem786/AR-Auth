@@ -9,12 +9,13 @@ from auth.dependencies.tenant import get_paginated_tenants, get_tenant_by_id_or_
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.errors import APIErrorCode
 from auth.logger import AuditLogger
-from auth.models import AuditLogMessage, Client, OAuthProvider, Tenant
+from auth.models import AuditLogMessage, Client, OAuthProvider, Tenant, Role
 from auth.repositories import (
     ClientRepository,
     OAuthProviderRepository,
     TenantRepository,
     ThemeRepository,
+    RoleRepository,
 )
 from auth.schemas.generics import PaginatedResults
 from auth.services.webhooks.models import (
@@ -59,6 +60,7 @@ async def create_tenant(
     oauth_provider_repository: OAuthProviderRepository = Depends(
         get_repository(OAuthProviderRepository)
     ),
+    role_repository: RoleRepository = Depends(get_repository(RoleRepository)),
     audit_logger: AuditLogger = Depends(get_audit_logger),
     trigger_webhooks: TriggerWebhooks = Depends(get_trigger_webhooks),
 ) -> schemas.tenant.Tenant:
@@ -83,11 +85,23 @@ async def create_tenant(
                 )
             oauth_providers.append(oauth_provider)
 
+    default_roles: list[Role] = []
+    if tenant_create.default_roles is not None:
+        for role_id in tenant_create.default_roles:
+            role = await role_repository.get_by_id(role_id)
+            if role is None:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    detail=APIErrorCode.TENANT_CREATE_NOT_EXISTING_ROLE,
+                )
+            default_roles.append(role)
+
     slug = await repository.get_available_slug(tenant_create.name)
     tenant = Tenant(
-        **tenant_create.model_dump(exclude={"oauth_providers"}),
+        **tenant_create.model_dump(exclude={"oauth_providers", "default_roles"}),
         slug=slug,
         oauth_providers=oauth_providers,
+        default_roles=default_roles,
     )
 
     tenant = await repository.create(tenant)
@@ -116,6 +130,7 @@ async def update_tenant(
     oauth_provider_repository: OAuthProviderRepository = Depends(
         get_repository(OAuthProviderRepository)
     ),
+    role_repository: RoleRepository = Depends(get_repository(RoleRepository)),
     audit_logger: AuditLogger = Depends(get_audit_logger),
     trigger_webhooks: TriggerWebhooks = Depends(get_trigger_webhooks),
 ) -> schemas.tenant.Tenant:
@@ -140,8 +155,20 @@ async def update_tenant(
                 )
             tenant.oauth_providers.append(oauth_provider)
 
+    print("Default roles:", tenant_update.default_roles)
+    if tenant_update.default_roles is not None:
+        tenant.default_roles = []
+        for role_id in tenant_update.default_roles:
+            role = await role_repository.get_by_id(role_id)
+            if role is None:
+                raise HTTPException(
+                    status.HTTP_400_BAD_REQUEST,
+                    detail=APIErrorCode.TENANT_UPDATE_NOT_EXISTING_ROLE,
+                )
+            tenant.default_roles.append(role)
+
     tenant_update_dict = tenant_update.model_dump(
-        exclude={"oauth_providers"}, exclude_unset=True
+        exclude={"oauth_providers", "default_roles"}, exclude_unset=True
     )
     for field, value in tenant_update_dict.items():
         setattr(tenant, field, value)

@@ -43,3 +43,7 @@ class Role(UUIDModel, CreatedUpdatedAt, Base):
 
     def __repr__(self) -> str:
         return f"Role(id={self.id}, name={self.name}, granted_by_default={self.granted_by_default}"
+
+    @property
+    def display_name(self) -> str:
+        return self.name
