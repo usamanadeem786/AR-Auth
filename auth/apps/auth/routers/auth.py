@@ -1,41 +1,32 @@
 import urllib.parse
 
-from fastapi import APIRouter, Depends, Query, Request, status
+from fastapi import APIRouter, Cookie, Depends, Query, Request, status
 from fastapi.responses import RedirectResponse
 from pydantic import AnyUrl
 
 from auth.apps.auth.forms.auth import ConsentForm, LoginForm
 from auth.apps.auth.forms.verify_email import VerifyEmailForm
-from auth.dependencies.auth import (
-    BaseContext,
-    check_unsupported_request_parameter,
-    get_authorize_acr,
-    get_authorize_client,
-    get_authorize_code_challenge,
-    get_authorize_prompt,
-    get_authorize_redirect_uri,
-    get_authorize_response_mode,
-    get_authorize_response_type,
-    get_authorize_scope,
-    get_authorize_screen,
-    get_base_context,
-    get_consent_prompt,
-    get_login_session,
-    get_needs_consent,
-    get_nonce,
-    get_optional_login_session,
-    has_valid_session_token,
-)
+from auth.dependencies.auth import (BaseContext,
+                                    check_unsupported_request_parameter,
+                                    get_authorize_acr, get_authorize_client,
+                                    get_authorize_code_challenge,
+                                    get_authorize_prompt,
+                                    get_authorize_redirect_uri,
+                                    get_authorize_response_mode,
+                                    get_authorize_response_type,
+                                    get_authorize_scope, get_authorize_screen,
+                                    get_base_context, get_consent_prompt,
+                                    get_login_session, get_needs_consent,
+                                    get_nonce, get_optional_login_session,
+                                    has_valid_session_token)
 from auth.dependencies.authentication_flow import get_authentication_flow
 from auth.dependencies.login_hint import LoginHint, get_login_hint
 from auth.dependencies.oauth_provider import get_oauth_providers
 from auth.dependencies.repositories import get_repository
 from auth.dependencies.session_token import (
-    get_session_token,
-    get_session_token_or_login,
+    get_session_token, get_session_token_or_login,
     get_user_from_session_token_or_login,
-    get_verified_email_user_from_session_token_or_verify,
-)
+    get_verified_email_user_from_session_token_or_verify)
 from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.users import get_user_manager
 from auth.exceptions import LogoutException
@@ -47,7 +38,8 @@ from auth.repositories.session_token import SessionTokenRepository
 from auth.schemas.auth import LogoutError
 from auth.services.acr import ACR
 from auth.services.authentication_flow import AuthenticationFlow
-from auth.services.user_manager import InvalidEmailVerificationCodeError, UserManager
+from auth.services.user_manager import (InvalidEmailVerificationCodeError,
+                                        UserManager)
 from auth.settings import settings
 
 router = APIRouter()
@@ -145,6 +137,7 @@ async def login(
     login_hint: LoginHint | None = Depends(get_login_hint),
     tenant: Tenant = Depends(get_current_tenant),
     context: BaseContext = Depends(get_base_context),
+    user_already_exists: str | None = Cookie(None, alias="user_already_exists"),
 ):
     # Prefill email with login_hint if it's a string
     initial_form_data = None
@@ -159,9 +152,9 @@ async def login(
         context={
             **context,
             "oauth_providers": oauth_providers,
-            "oauth_provider_login_hint": login_hint
-            if isinstance(login_hint, OAuthProvider)
-            else None,
+            "oauth_provider_login_hint": (
+                login_hint if isinstance(login_hint, OAuthProvider) else None
+            ),
         },
     )
     form = await form_helper.get_form()
@@ -184,6 +177,16 @@ async def login(
         )
         response = await authentication_flow.set_login_hint(response, str(user.email))
 
+        return response
+
+    if user_already_exists and user_already_exists == "exists":
+        response = await form_helper.get_error_response(
+            _(
+                "An account with this email address already exists. Please log in using your email and password."
+            ),
+            error_code="user_already_exists",
+        )
+        response.delete_cookie("user_already_exists")
         return response
 
     return await form_helper.get_response()

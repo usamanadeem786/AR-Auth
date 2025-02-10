@@ -2,31 +2,24 @@ from fastapi import APIRouter, Depends, Header, Request, Response, status
 from fastapi.responses import RedirectResponse
 
 from auth.apps.auth.forms.register import RF, get_register_form_class
-from auth.dependencies.auth import (
-    BaseContext,
-    get_base_context,
-    get_optional_login_session,
-)
+from auth.dependencies.auth import (BaseContext, get_base_context,
+                                    get_optional_login_session)
 from auth.dependencies.authentication_flow import get_authentication_flow
 from auth.dependencies.oauth_provider import get_oauth_providers
-from auth.dependencies.register import (
-    get_optional_registration_session,
-    get_registration_flow,
-)
+from auth.dependencies.register import (get_optional_registration_session,
+                                        get_registration_flow)
 from auth.dependencies.tenant import get_current_tenant
 from auth.exceptions import LoginException
 from auth.forms import FormHelper
 from auth.locale import gettext_lazy as _
-from auth.models import (
-    OAuthProvider,
-    RegistrationSession,
-    RegistrationSessionFlow,
-    Tenant,
-)
+from auth.models import (OAuthProvider, RegistrationSession,
+                         RegistrationSessionFlow, Tenant)
 from auth.schemas.auth import LoginError
 from auth.services.authentication_flow import AuthenticationFlow
 from auth.services.registration_flow import RegistrationFlow
-from auth.services.user_manager import UserAlreadyExistsError
+from auth.services.user_manager import (UserAlreadyExistsError,
+                                        UserDoesNotExistError)
+from auth.settings import settings
 
 router = APIRouter()
 
@@ -75,7 +68,26 @@ async def register(
         and registration_session is not None
         and registration_session.email
     ):
-        form.email.data = registration_session.email
+        try:
+            await registration_flow.user_manager.get_by_email(
+                registration_session.email
+            )
+            response = RedirectResponse(
+                url=tenant.url_path_for(request, "auth:login"),
+                status_code=status.HTTP_302_FOUND,
+            )
+            response = await registration_flow.delete_registration_session(
+                response, registration_session
+            )
+            response.set_cookie(
+                "user_already_exists",
+                "exists",
+                domain=settings.registration_session_cookie_domain,
+                secure=settings.registration_session_cookie_secure,
+            )
+            return response
+        except UserDoesNotExistError:
+            form.email.data = registration_session.email
 
     if (
         registration_session is not None
