@@ -11,46 +11,29 @@ from sqlalchemy.orm import joinedload
 from auth.crypto.access_token import InvalidAccessToken, read_access_token
 from auth.crypto.password import password_helper
 from auth.dependencies.logger import get_audit_logger
-from auth.dependencies.pagination import (
-    GetPaginatedObjects,
-    Ordering,
-    OrderingGetter,
-    PaginatedObjects,
-    Pagination,
-    get_paginated_objects_getter,
-    get_pagination,
-)
+from auth.dependencies.pagination import (GetPaginatedObjects, Ordering,
+                                          OrderingGetter, PaginatedObjects,
+                                          Pagination,
+                                          get_paginated_objects_getter,
+                                          get_pagination)
 from auth.dependencies.repositories import get_repository
 from auth.dependencies.request import get_request_json
 from auth.dependencies.tasks import get_send_task
-from auth.dependencies.tenant import (
-    get_current_tenant,
-)
-from auth.dependencies.user_field import (
-    get_admin_user_update_model,
-    get_user_create_admin_model,
-    get_user_fields,
-    get_user_update_model,
-)
+from auth.dependencies.tenant import get_current_tenant
+from auth.dependencies.user_field import (get_admin_user_update_model,
+                                          get_user_create_admin_model,
+                                          get_user_fields,
+                                          get_user_update_model)
 from auth.dependencies.user_roles import get_user_roles_service
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.errors import APIErrorCode
 from auth.logger import AuditLogger
-from auth.models import (
-    OAuthAccount,
-    Tenant,
-    User,
-    UserField,
-    UserPermission,
-    UserRole,
-)
-from auth.repositories import (
-    EmailVerificationRepository,
-    OAuthAccountRepository,
-    UserPermissionRepository,
-    UserRepository,
-    UserRoleRepository,
-)
+from auth.models import (OAuthAccount, Tenant, User, UserField, UserPermission,
+                         UserRole)
+from auth.repositories import (EmailVerificationRepository,
+                               OAuthAccountRepository,
+                               UserPermissionRepository, UserRepository,
+                               UserRoleRepository)
 from auth.schemas.user import UF, UserCreateAdmin, UserUpdate, UserUpdateAdmin
 from auth.services.acr import ACR
 from auth.services.user_manager import UserManager
@@ -195,6 +178,18 @@ async def get_user_permissions(
     return await user_permission_repository.list(statement)
 
 
+async def get_current_user_permissions(
+    user: User = Depends(current_active_user),
+    user_permission_repository: UserPermissionRepository = Depends(
+        get_repository(UserPermissionRepository)
+    ),
+) -> list[UserPermission]:
+    statement = user_permission_repository.get_by_user_statement(
+        user.id, direct_only=True
+    )
+    return await user_permission_repository.list(statement)
+
+
 async def get_paginated_user_roles(
     pagination: Pagination = Depends(get_pagination),
     ordering: Ordering = Depends(OrderingGetter()),
@@ -214,6 +209,16 @@ async def get_paginated_user_roles(
 
 async def get_user_roles(
     user: User = Depends(get_user_by_id_or_404),
+    user_role_repository: UserRoleRepository = Depends(
+        get_repository(UserRoleRepository)
+    ),
+) -> list[UserRole]:
+    statement = user_role_repository.get_by_user_statement(user.id)
+    return await user_role_repository.list(statement)
+
+
+async def get_current_user_roles(
+    user: User = Depends(current_active_user),
     user_role_repository: UserRoleRepository = Depends(
         get_repository(UserRoleRepository)
     ),

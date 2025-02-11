@@ -11,6 +11,8 @@ from auth.models.user_field import UserField
 
 if TYPE_CHECKING:
     from auth.models.user_field_value import UserFieldValue
+    from auth.models.user_permission import UserPermission
+    from auth.models.user_role import UserRole
 
 
 class User(UUIDModel, CreatedUpdatedAt, Base):
@@ -67,8 +69,25 @@ class User(UUIDModel, CreatedUpdatedAt, Base):
             "email_verified": self.email_verified,
             "is_active": self.is_active,
             "tenant_id": str(self.tenant_id),
-            "roles": {
-                "default": [
+            "fields": fields,
+        }
+
+    def get_claims_with_scopes(
+        self, user_roles: list["UserRole"], user_permissions: list["UserPermission"]
+    ) -> dict[str, Any]:
+        fields = dict(
+            user_field_value.get_slug_and_value(json_serializable=True)
+            for user_field_value in self.user_field_values
+        )
+        return {
+            "sub": str(self.id),
+            "email": self.email,
+            "email_verified": self.email_verified,
+            "is_active": self.is_active,
+            "tenant_id": str(self.tenant_id),
+            "fields": fields,
+            "scopes": {
+                "tenant": [
                     {
                         "name": str(role.display_name),
                         "permissions": [
@@ -81,21 +100,28 @@ class User(UUIDModel, CreatedUpdatedAt, Base):
                     }
                     for role in self.tenant.default_roles
                 ],
-                # "user": [
-                #     {
-                #         "name": str(user_role.role),
-                #         # "permissions": [
-                #         #     {
-                #         #         "name": str(permission.name),
-                #         #         "codename": str(permission.codename),
-                #         #     }
-                #         #     for permission in user_role.role.permissions
-                #         # ],
-                #     }
-                #     for user_role in self.user_roles
-                # ],
+                "roles": [
+                    {
+                        "name": str(user_role.role.name),
+                        "granted_by_default": str(user_role.role.granted_by_default),
+                        "permissions": [
+                            {
+                                "name": str(permission.name),
+                                "codename": str(permission.codename),
+                            }
+                            for permission in user_role.role.permissions
+                        ],
+                    }
+                    for user_role in user_roles
+                ],
+                "permissions": [
+                    {
+                        "name": str(user_permission.permission.name),
+                        "codename": str(user_permission.permission.codename),
+                    }
+                    for user_permission in user_permissions
+                ],
             },
-            "fields": fields,
         }
 
     @classmethod
