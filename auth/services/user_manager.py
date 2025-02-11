@@ -11,30 +11,17 @@ from auth.crypto.password import PasswordHelper
 from auth.crypto.verify_code import generate_verify_code, get_verify_code_hash
 from auth.dependencies.webhooks import TriggerWebhooks
 from auth.logger import AuditLogger
-from auth.models import (
-    AuditLogMessage,
-    EmailVerification,
-    Tenant,
-    User,
-    UserField,
-    UserFieldValue,
-)
+from auth.models import (AuditLogMessage, EmailVerification, Tenant, User,
+                         UserField, UserFieldValue)
 from auth.repositories import EmailVerificationRepository, UserRepository
 from auth.services.password import PasswordValidation
 from auth.services.user_roles import UserRolesService
-from auth.services.webhooks.models import (
-    UserCreated,
-    UserForgotPasswordRequested,
-    UserPasswordReset,
-    UserUpdated,
-)
+from auth.services.webhooks.models import (UserCreated,
+                                           UserForgotPasswordRequested,
+                                           UserPasswordReset, UserUpdated)
 from auth.settings import settings
-from auth.tasks import (
-    SendTask,
-    on_after_forgot_password,
-    on_after_register,
-    on_email_verification_requested,
-)
+from auth.tasks import (SendTask, on_after_forgot_password, on_after_register,
+                        on_email_verification_requested)
 
 RESET_PASSWORD_TOKEN_AUDIENCE = "auth:reset"
 
@@ -93,6 +80,14 @@ class UserManager:
 
     async def get(self, id: UUID4, tenant: UUID4) -> User:
         user = await self.user_repository.get_by_id_and_tenant(id, tenant)
+
+        if user is None:
+            raise UserDoesNotExistError()
+
+        return user
+
+    async def get_by_id(self, id: UUID4) -> User:
+        user = await self.user_repository.get_by_id(id)
 
         if user is None:
             raise UserDoesNotExistError()

@@ -16,6 +16,10 @@ class UserRepository(BaseRepository[User], UUIDRepositoryMixin[User]):
         statement = select(User).where(User.id == id, User.tenant_id == tenant)
         return await self.get_one_or_none(statement)
 
+    async def get_by_id(self, id: UUID4) -> User | None:
+        statement = select(User).where(User.id == id)
+        return await self.get_one_or_none(statement)
+
     async def get_by_email_and_tenant(self, email: str, tenant: UUID4) -> User | None:
         statement = select(User).where(
             User.email_lower == email.lower(), User.tenant_id == tenant

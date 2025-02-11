@@ -12,11 +12,8 @@ from auth.dependencies.repositories import get_repository
 from auth.dependencies.users import get_user_manager
 from auth.exceptions import TokenRequestException
 from auth.models import Client, ClientType, User
-from auth.repositories import (
-    AuthorizationCodeRepository,
-    ClientRepository,
-    RefreshTokenRepository,
-)
+from auth.repositories import (AuthorizationCodeRepository, ClientRepository,
+                               RefreshTokenRepository)
 from auth.schemas.auth import TokenError
 from auth.services.acr import ACR
 from auth.services.user_manager import UserDoesNotExistError, UserManager
@@ -200,8 +197,6 @@ async def get_user_from_grant_request(
     user_manager: UserManager = Depends(get_user_manager),
 ) -> User:
     try:
-        return await user_manager.get(
-            grant_request["user_id"], grant_request["client"].tenant_id
-        )
+        return await user_manager.get_by_id(grant_request["user_id"])
     except UserDoesNotExistError as e:
         raise TokenRequestException(TokenError.get_invalid_grant()) from e
