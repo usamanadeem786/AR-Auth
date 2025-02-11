@@ -315,6 +315,9 @@ async def create_user_access_token(
         tenant_host = tenant.get_host()
         permissions = await get_user_permissions(user)
 
+        for role in tenant.default_roles:
+            permissions.extend([permission.codename for permission in role.permissions])
+
         access_token = generate_access_token(
             user.tenant.get_sign_jwk(),
             tenant_host,

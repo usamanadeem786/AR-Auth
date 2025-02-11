@@ -43,6 +43,9 @@ async def token(
     client = grant_request["client"]
     permissions = await get_user_permissions(user)
 
+    for role in tenant.default_roles:
+        permissions.extend([permission.codename for permission in role.permissions])
+
     tenant_host = tenant.get_host()
     access_token = generate_access_token(
         tenant.get_sign_jwk(),

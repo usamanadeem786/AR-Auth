@@ -3,12 +3,10 @@ from fastapi.responses import JSONResponse
 
 from auth.dependencies.users import (current_active_user,
                                      current_active_user_acr_level_1,
-                                     current_user,
-                                     get_current_user_permissions,
-                                     get_current_user_roles, get_user_manager,
+                                     current_user, get_user_manager,
                                      get_user_update)
 from auth.errors import APIErrorCode
-from auth.models import User, UserPermission, UserRole
+from auth.models import User
 from auth.schemas.user import (UF, UserChangeEmail, UserChangePassword,
                                UserUpdate, UserVerifyEmail)
 from auth.services.user_manager import (InvalidEmailVerificationCodeError,
@@ -26,22 +24,6 @@ async def userinfo(user: User = Depends(current_active_user)):
     https://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest
     """
     return user.get_claims()
-
-
-@router.api_route(
-    "/userinfo/scopes", methods=["GET", "POST"], name="user:userinfo_scopes"
-)
-async def userinfo_scopes(
-    user: User = Depends(current_active_user),
-    user_roles: list[UserRole] = Depends(get_current_user_roles),
-    user_permissions: list[UserPermission] = Depends(get_current_user_permissions),
-):
-    """
-    OpenID specification requires the /userinfo endpoint
-    to be available both with GET and POST methods 🤷‍♂️
-    https://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest
-    """
-    return user.get_claims_with_scopes(user_roles, user_permissions)
 
 
 @router.patch(

@@ -178,18 +178,6 @@ async def get_user_permissions(
     return await user_permission_repository.list(statement)
 
 
-async def get_current_user_permissions(
-    user: User = Depends(current_active_user),
-    user_permission_repository: UserPermissionRepository = Depends(
-        get_repository(UserPermissionRepository)
-    ),
-) -> list[UserPermission]:
-    statement = user_permission_repository.get_by_user_statement(
-        user.id, direct_only=True
-    )
-    return await user_permission_repository.list(statement)
-
-
 async def get_paginated_user_roles(
     pagination: Pagination = Depends(get_pagination),
     ordering: Ordering = Depends(OrderingGetter()),
@@ -209,16 +197,6 @@ async def get_paginated_user_roles(
 
 async def get_user_roles(
     user: User = Depends(get_user_by_id_or_404),
-    user_role_repository: UserRoleRepository = Depends(
-        get_repository(UserRoleRepository)
-    ),
-) -> list[UserRole]:
-    statement = user_role_repository.get_by_user_statement(user.id)
-    return await user_role_repository.list(statement)
-
-
-async def get_current_user_roles(
-    user: User = Depends(current_active_user),
     user_role_repository: UserRoleRepository = Depends(
         get_repository(UserRoleRepository)
     ),
