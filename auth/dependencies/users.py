@@ -90,7 +90,7 @@ def current_user(
             claims = read_access_token(tenant.get_sign_jwk(), token)
             user_id = uuid.UUID(claims["sub"])
             acr_claim = ACR(claims["acr"])
-            user = await user_manager.get(user_id, tenant.id)
+            user = await user_manager.get_by_id(user_id)
         except (InvalidAccessToken, KeyError, ValueError) as e:
             if optional:
                 return None
