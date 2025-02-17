@@ -3,24 +3,22 @@
 {% extends "auth/base.html" %}
 
 {% block body %}
-  <main style='background-color: #080f26;' >
-    <img src="{{ url_for('dashboard:static', path='/BG.webp') }}" alt="bg1" style="z-index: 0;" class="bg-[size:100%] bg-no-repeat overflow-x-hidden absolute " />
+  <main>
     <div class="relative flex">
       <div class="w-full">
         <div class="min-h-screen h-full flex flex flex-col after:flex-1">
           <div class="flex-1">
-            <div style="gap: 1rem;" class="flex items-center justify-start h-16 py-2 px-4 sm:px-6 lg:px-8">
-
-              <img src="{{ url_for('dashboard:static', path='/logo.png') }}" alt="{{ tenant.name }}" class="max-h-full max-w-[100px]" />
-          
-              <span class="text-3xl  text-white font-bold">{{ tenant.name }}</span>
-          
+            <div class="flex items-center justify-between h-16 py-2 px-4 sm:px-6 lg:px-8">
+              {% if tenant.logo_url %}
+                <img src="{{ tenant.logo_url }}" alt="{{ tenant.name }}" class="max-h-full max-w-[100px]" />
+              {% else %}
+                <span class="text-3xl text-accent font-bold">{{ tenant.name }}</span>
+              {% endif %}
             </div>
-          
           </div>
 
-          <div class="w-full mx-auto px-4 py-8" style="max-width: 400px; width: 400px; ">
-                <h1 class="text-3xl text-white font-bold mb-6">{% block title %}{% endblock %}</h1>
+          <div class="w-full max-w-sm mx-auto px-4 py-8">
+            <h1 class="text-3xl text-accent font-bold mb-6">{% block title %}{% endblock %}</h1>
             {% if error is defined %}
               <div class="my-4 px-4 py-2 rounded-sm text-sm bg-red-100 border border-red-200 text-red-600">
                 <div class="flex w-full justify-between items-start">
@@ -49,7 +47,11 @@
               {% block auth_form %}
               {% endblock %}
             {% endif %}
-         
+            {% if show_branding %}
+              <div class="pt-5 mt-6 border-t border-light">
+                {{ branding.branding() }}
+              </div>
+            {% endif %}
           </div>
         </div>
       </div>

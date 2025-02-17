@@ -117,7 +117,7 @@ ENV/
 
 # node_modules
 node_modules/
-pnpm-lock.yaml
+
 # Generated files
 auth/static/*.js
 auth/static/*.css
