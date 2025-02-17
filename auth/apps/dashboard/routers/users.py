@@ -197,10 +197,10 @@ async def create_user(
             audit_logger.log_object_write(AuditLogMessage.OBJECT_CREATED, user)
         except UserAlreadyExistsError:
             form.email.errors.append(
-                "A user with this email address already exists on this tenant."
+                "A user with this email address already exists."
             )
             return await form_helper.get_error_response(
-                "A user with this email address already exists on this tenant.",
+                "A user with this email address already exists.",
                 "user_already_exists",
             )
         except InvalidPasswordError as e:
@@ -259,10 +259,10 @@ async def update_user(
             audit_logger.log_object_write(AuditLogMessage.OBJECT_UPDATED, user)
         except UserAlreadyExistsError:
             form.email.errors.append(
-                "A user with this email address already exists on this tenant."
+                "A user with this email address already exists."
             )
             return await form_helper.get_error_response(
-                "A user with this email address already exists on this tenant.",
+                "A user with this email address already exists.",
                 "user_already_exists",
             )
         except InvalidPasswordError as e:
@@ -298,24 +298,23 @@ async def create_user_access_token(
         context={**context, **list_context, "user": user},
     )
     form = await form_helper.get_form()
-    form.client.query_endpoint_path = f"/admin/clients?tenant={user.tenant_id}"
+    form.client.query_endpoint_path = f"/admin/clients"
 
     if await form_helper.is_submitted_and_valid():
         data = form.data
-        tenant = user.tenant
 
         client = await client_repository.get_by_id(data["client"])
-        if client is None or client.tenant_id != tenant.id:
+        if client is None:
             form.client.errors.append("Unknown client.")
             return await form_helper.get_error_response(
                 "Unknown client.", "unknown_client"
             )
         form.client.data = client
 
-        tenant_host = tenant.get_host()
+        tenant_host = client.tenant.get_host()
         permissions = await get_user_permissions(user)
 
-        for role in tenant.default_roles:
+        for role in client.tenant.default_roles:
             permissions.extend([permission.codename for permission in role.permissions])
 
         access_token = generate_access_token(
