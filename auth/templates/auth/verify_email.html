@@ -6,9 +6,14 @@
 
 {% block head_title_content %}{{ _('Verify your email') }}{% endblock %}
 
-{% block title %}{{ _('Verify your email') }}{% endblock %}
 
 {% block auth_form %}
+<div style="padding: 2rem; background: linear-gradient(to right, #1C1C4B, #544485); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); backdrop-filter: blur(4px); border-radius: 0.75rem; transition: border-color 0.3s, box-shadow 0.3s;">
+  <div style="display: flex; gap: 1rem; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 1rem;">
+    <img style="width: 130px;" src="{{ url_for('dashboard:static', path='/logo.png') }}" />
+    <h1 class="text-3xl text-white font-bold ">{{ _('Verify your email') }}</h1>
+  
+  </div>
 <script type="text/hyperscript">
   on load
     set $submitPending to false
@@ -37,7 +42,7 @@
     end
   "
 >
-  <div class="space-y-4">
+  <div class="space-y-4 text-white">
     <p class="text-justify text-sm">{{ _("To complete the email verification process, please check your email for the verification code. Enter the code below to verify your email address.") }}</p>
     {{ verify_email.form(form, code_length) }}
   </div>
@@ -47,5 +52,12 @@
       {{ _("Verify my email") }}
     {% endcall %}
   </div>
+
 </form>
+{% if show_branding %}
+<div class="pt-5 mt-6 text-white border-t border-light">
+  {{ branding.branding() }}
+</div>
+{% endif %}
+</div>
 {% endblock %}

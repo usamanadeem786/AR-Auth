@@ -10,17 +10,18 @@
   {% endif %}
 {% endblock %}
 
-{% block title %}
-  {% if finalize %}
-    {{ _('Finalize sign up') }}
-  {% else %}
-    {{ _('Sign up') }}
-  {% endif %}
-{% endblock %}
+
 
 {% block auth_form %}
+<div style="padding: 2rem; background: linear-gradient(to right, #1C1C4B, #544485); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); backdrop-filter: blur(4px); border-radius: 0.75rem; transition: border-color 0.3s, box-shadow 0.3s;">
+  <div style="display: flex; gap: 1rem; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 1rem;">
+    <img style="width: 130px;" src="{{ url_for('dashboard:static', path='/logo.png') }}" />
+    <h1 class="text-3xl text-white font-bold ">{{ _('Sign up') }}</h1>
+  
+  </div>
+    
   <form method="POST" action="{{ tenant.url_path_for(request, 'register:register') }}">
-    <div class="space-y-4">
+    <div class="space-y-4 text-white">
       {{ forms.form_field(form.email) }}
       {% if form.password %}
         {{ forms.form_field(form.password) }}
@@ -32,15 +33,16 @@
     </div>
     {% if finalize %}
       <div class="flex items-center justify-end">
-        <button type="submit" class="btn bg-primary hover:bg-primary-hover text-white">{{ _('Finalize sign up') }}</button>
+        <button type="submit" style='background: linear-gradient(to right, #5c63f0, #a65cf0);' class="btn  text-white">{{ _('Finalize sign up') }}</button>
       </div>
     {% else %}
       <div class="flex items-center justify-between mt-6">
         <div class="mr-1">
-          <a class="text-sm underline hover:no-underline" href="{{ tenant.url_path_for(request, 'auth:login') }}">{{ _('I already have an account') }}</a>
+          <a class="text-sm text-white underline hover:no-underline" href="{{ tenant.url_path_for(request, 'auth:login') }}">{{ _('I already have an account') }}</a>
         </div>
-        <button type="submit" class="btn bg-primary hover:bg-primary-hover text-white ml-3">{{ _('Sign up') }}</button>
       </div>
+      <button type="submit" style='background: linear-gradient(to right, #5c63f0, #a65cf0);' class="btn  text-white w-full mt-2">{{ _('Sign up') }}</button>
+
     {% endif %}
   </form>
   {% if not finalize and oauth_providers | length > 0 %}
@@ -48,12 +50,18 @@
       {% for oauth_provider in oauth_providers %}
         {% set display_name, logo_svg = get_oauth_provider_branding(oauth_provider) %}
         <a href="{{ url_for('oauth:authorize') }}?tenant={{ tenant.id }}&provider={{ oauth_provider.id }}" class="btn w-full justify-start border border-primary hover:border-primary-hover text-primary-500 hover:text-primary-hover">
-          {% if logo_svg %}
+          <!-- {% if logo_svg %}
             <img src="data:image/svg+xml;base64,{{ logo_svg }}" class="w-4 mr-4" />
-          {% endif %}
+          {% endif %} -->
           {{ _('Sign up with %(provider)s', provider=display_name) }}
         </a>
       {% endfor %}
     </div>
   {% endif %}
+  {% if show_branding %}
+  <div class="pt-5 mt-6 text-white border-t border-light">
+    {{ branding.branding() }}
+  </div>
+{% endif %}
+</div>
 {% endblock %}

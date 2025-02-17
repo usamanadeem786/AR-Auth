@@ -3,13 +3,15 @@
 {% extends "auth/base.html" %}
 
 {% block body %}
-<main>
-  <div class="flex items-center justify-between h-16 py-2 px-4 sm:px-6 lg:px-8">
-    {% if tenant.logo_url %}
-    <img src="{{ tenant.logo_url }}" alt="{{ tenant.name }}" class="max-h-full max-w-[100px]" />
-    {% else %}
-    <span class="text-3xl text-accent font-bold">{{ tenant.name }}</span>
-    {% endif %}
+<main style='background-color: #080f26;' >
+  <img src="{{ url_for('dashboard:static', path='/BG.webp') }}" alt="bg" style="z-index: -10;" class="bg-[size:100%] bg-no-repeat overflow-x-hidden absolute " />
+
+  <div style="gap: 1rem;" class="flex items-center justify-start h-16 py-2 px-4 sm:px-6 lg:px-8">
+
+    <img src="{{ url_for('dashboard:static', path='/logo.png') }}" alt="{{ tenant.name }}" class="max-h-full max-w-[100px]" />
+
+    <span class="text-3xl  text-white font-bold">{{ tenant.name }}</span>
+
   </div>
 
   <div class="w-full px-4 sm:px-6 lg:px-8 my-0 lg:my-8">

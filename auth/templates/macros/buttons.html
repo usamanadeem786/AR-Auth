@@ -20,7 +20,8 @@
 {% macro submit(class) %}
 <button
   type="submit"
-  class="{{ class }} group bg-primary-500 hover:bg-primary-600 text-white disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+  style='background: linear-gradient(to right, #5c63f0, #a65cf0);' 
+  class="{{ class }} text-white disabled:border-slate-200 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
 >
   {{ icons.spinner('hidden group-disabled:block w-4 h-4 shrink-0 mr-2') }}
   {{ caller() }}

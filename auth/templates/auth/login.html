@@ -4,32 +4,39 @@
 
 {% block head_title_content %}{{ _('Sign in') }}{% endblock %}
 
-{% block title %}{{ _('Welcome back!') }}{% endblock %}
 
-{% macro oauth_provider_button(oauth_provider, tenant) %}
-  {% set display_name, logo_svg = get_oauth_provider_branding(oauth_provider) %}
-  <a href="{{ url_for('oauth:authorize') }}?tenant={{ tenant.id }}&provider={{ oauth_provider.id }}" class="btn w-full justify-start border border-primary hover:border-primary-hover text-primary-500 hover:text-primary-hover">
-    {% if logo_svg %}
-      <img src="data:image/svg+xml;base64,{{ logo_svg }}" class="w-4 mr-4" />
-    {% endif %}
-    {{ _('Sign in with %(provider)s', provider=display_name) }}
-  </a>
-{% endmacro %}
 
 {% block auth_form %}
-  <form method="POST" action="{{ tenant.url_path_for(request, 'auth:login') }}">
+<div style="padding: 2rem; background: linear-gradient(to right, #1C1C4B, #544485); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); backdrop-filter: blur(4px); border-radius: 0.75rem; transition: border-color 0.3s, box-shadow 0.3s;">
+  {% macro oauth_provider_button(oauth_provider, tenant) %}
+{% set display_name, logo_svg = get_oauth_provider_branding(oauth_provider) %}
+<a href="{{ url_for('oauth:authorize') }}?tenant={{ tenant.id }}&provider={{ oauth_provider.id }}" class="btn w-full justify-start border border-gray-300 hover:border-gray-400 text-gray-600 hover:text-gray-800">
+  <!-- {% if logo_svg %}
+      <img src="data:image/svg+xml;base64,{{ logo_svg }}" class="w-4 mr-4" />
+  {% endif %} -->
+
+  {{ _('Sign in with %(provider)s', provider=display_name) }}
+</a>
+{% endmacro %}
+<div style="display: flex; gap: 1rem; flex-direction: column; justify-content: center; align-items: center; margin-bottom: 1rem;">
+  <img style="width: 130px;" src="{{ url_for('dashboard:static', path='/logo.png') }}" />
+  <h1 class="text-xl text-white font-bold ">{{ _('Welcome back!') }}</h1>
+</div>
+  
+  <form method="POST" action="{{ tenant.url_path_for(request, 'auth:login') }}" class="space-y-6 text-white">
     <div class="space-y-4">
       {{ forms.form_field(form.email) }}
       {{ forms.form_field(form.password) }}
       {{ forms.form_csrf_token(form) }}
     </div>
-    <div class="flex items-center justify-between mt-6">
-      <div class="mr-1">
-        <a class="text-sm underline hover:no-underline" href="{{ tenant.url_path_for(request, 'reset:forgot') }}">{{ _('I forgot my password') }}</a>
-      </div>
-      <button type="submit" class="btn bg-primary hover:bg-primary-hover text-white ml-3">{{ _('Sign in') }}</button>
+    <div class="mr-1">
+      <a class="text-sm underline hover:no-underline" href="{{ tenant.url_path_for(request, 'reset:forgot') }}">{{ _('I forgot my password') }}</a>
     </div>
+   
+      <button type="submit" style='background: linear-gradient(to right, #5c63f0, #a65cf0);' class="btn   text-white w-full">{{ _('Sign in') }}</button>
+
   </form>
+
   {% if oauth_providers | length > 0 %}
     <div class="pt-5 mt-6 border-t border-light space-y-2">
       {% if oauth_provider_login_hint %}
@@ -45,12 +52,20 @@
       {% endfor %}
     </div>
   {% endif %}
+  
   {% if tenant.registration_allowed %}
-    <div class="pt-5 mt-6 border-t border-light">
-      <div class="text-sm">
-        {{ _("Don't have an account?") }}
-        <a href="{{ tenant.url_path_for(request, 'register:register') }}" class="font-medium text-primary-500 hover:text-primary-600">{{ _('Sign up') }}</a>
-      </div>
+  <div class="pt-5 mt-6 border-t border-light text-white">
+    <div class="text-sm">
+      {{ _("Don't have an account?") }}
+      <a href="{{ tenant.url_path_for(request, 'register:register') }}" class="font-medium text-primary-500 hover:text-primary-600">{{ _('Sign up') }}</a>
     </div>
+  </div>
+  
   {% endif %}
+  {% if show_branding %}
+  <div class="pt-5 mt-6 text-white border-t border-light">
+    {{ branding.branding() }}
+  </div>
+{% endif %}
+</div>
 {% endblock %}

@@ -7,16 +7,16 @@
 {% block head_title_content %}{{ _("Profile") }}{% endblock %}
 
 {% block content %}
-<h2 class="text-2xl text-slate-800 font-bold mb-5">{{ _("Profile") }}</h2>
-<section>
-  <h3 class="text-xl leading-snug text-slate-800 font-bold mb-1">{{ _("Email") }}</h3>
+<h2 class="text-2xl text-white font-bold mb-5">{{ _("Profile") }}</h2>
+<section class="text-white">
+  <h3 class="text-xl leading-snug text-white font-bold mb-1">{{ _("Email") }}</h3>
   <div class="text-sm">{{ _("Manage your email address to receive important updates and notifications.") }}</div>
   <div id="email-change" class="flex flex-wrap mt-5 items-center">
       <div class="mr-2">
         {{ user.email }}
       </div>
       <button
-        class="btn border-slate-200 hover:border-slate-300 shadow-sm text-primary"
+        class="btn border-slate-200 hover:border-slate-300 shadow-sm text-white"
         hx-get="{{ tenant.url_path_for(request, 'auth.dashboard:email_change') }}"
         hx-target="#email-change"
       >
@@ -26,10 +26,10 @@
 </section>
 {% if form.fields.form._fields | length > 0 %}
 <section>
-  <h3 class="text-xl leading-snug text-slate-800 font-bold mb-1">{{ _("Profile information") }}</h3>
-  <div class="text-sm">{{ _("Manage your profile information.") }}</div>
-  <form hx-boost="true" method="POST" class="w-full md:w-1/2">
-    <div class="space-y-4">
+  <h3 class="text-xl leading-snug text-white font-bold mb-1 text-white">{{ _("Profile information") }}</h3>
+  <div class="text-sm text-white">{{ _("Manage your profile information.") }}</div>
+  <form hx-boost="true" method="POST" class="w-full md:w-1/2 text-white">
+    <div class="space-y-4 text-white">
       {% if success %}
         {% call alerts.success() %}
           {{ success }}
