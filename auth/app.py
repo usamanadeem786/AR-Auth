@@ -2,6 +2,7 @@ from os import environ
 
 import sentry_sdk
 from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
 from redis.exceptions import RedisError
 from sentry_sdk.integrations.asgi import SentryAsgiMiddleware
@@ -33,6 +34,13 @@ app.add_middleware(SentryAsgiMiddleware)
 app.add_middleware(
     XForwardedHostMiddleware,
     trusted_hosts=environ.get("FORWARDED_ALLOW_IPS", "127.0.0.1"),
+)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=settings.allow_origin_regex,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 

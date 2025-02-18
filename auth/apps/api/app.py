@@ -1,10 +1,11 @@
 from fastapi import FastAPI
-from fastapi.middleware.cors import CORSMiddleware
 
 from auth import __version__
 from auth.apps.api.routers.clients import router as clients_router
-from auth.apps.api.routers.email_templates import router as email_templates_router
-from auth.apps.api.routers.oauth_providers import router as oauth_providers_router
+from auth.apps.api.routers.email_templates import \
+    router as email_templates_router
+from auth.apps.api.routers.oauth_providers import \
+    router as oauth_providers_router
 from auth.apps.api.routers.permissions import router as permissions_router
 from auth.apps.api.routers.roles import router as roles_router
 from auth.apps.api.routers.tenants import router as tenants_router
@@ -33,9 +34,9 @@ app = FastAPI(
             "variables": {
                 "scheme": {
                     "enum": ["http", "https"],
-                    "default": "http"
-                    if is_localhost(settings.auth_domain)
-                    else "https",
+                    "default": (
+                        "http" if is_localhost(settings.auth_domain) else "https"
+                    ),
                 },
                 "host": {
                     "default": settings.auth_domain,
@@ -46,13 +47,6 @@ app = FastAPI(
     ],
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=settings.allow_origin_regex,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 app.add_middleware(SecurityHeadersMiddleware)
 
 app.include_router(clients_router, prefix="/clients", tags=["Clients"])
