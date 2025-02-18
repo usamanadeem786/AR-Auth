@@ -1,4 +1,5 @@
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -12,12 +13,12 @@ from auth.apps.auth.routers.reset import router as reset_router
 from auth.apps.auth.routers.token import router as token_router
 from auth.apps.auth.routers.user import router as user_router
 from auth.apps.auth.routers.well_known import router as well_known_router
-from auth.middlewares.cors import CORSMiddlewarePath
 from auth.middlewares.csrf import CSRFCookieSetterMiddleware
 from auth.middlewares.locale import (BabelMiddleware,
                                      get_babel_middleware_kwargs)
 from auth.middlewares.security_headers import SecurityHeadersMiddleware
 from auth.paths import STATIC_DIRECTORY
+from auth.settings import settings
 
 
 def include_routers(router: APIRouter) -> APIRouter:
@@ -40,14 +41,13 @@ app = FastAPI(title="Auth Authentication API", version=__version__)
 app.add_middleware(SecurityHeadersMiddleware)
 app.add_middleware(CSRFCookieSetterMiddleware)
 app.add_middleware(GZipMiddleware)
-# app.add_middleware(
-#     CORSMiddlewarePath,
-#     allow_origins=["*"],
-#     allow_credentials=False,
-#     allow_methods=["*"],
-#     allow_headers=["Authorization", "X-Requested-With"],
-#     path_regex="^.*(/api|/.well-known)",
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origin_regex=settings.allow_origin_regex,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.add_middleware(BabelMiddleware, **get_babel_middleware_kwargs())  # type: ignore
 app.include_router(oauth_router, include_in_schema=False)

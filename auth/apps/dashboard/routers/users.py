@@ -318,7 +318,7 @@ async def create_user_access_token(
             permissions.extend([permission.codename for permission in role.permissions])
 
         access_token = generate_access_token(
-            user.tenant.get_sign_jwk(),
+            client.tenant.get_sign_jwk(),
             tenant_host,
             client,
             datetime.now(UTC),

@@ -1,3 +1,4 @@
+# __DEPRECATED__
 import re
 
 from fastapi.middleware.cors import CORSMiddleware
@@ -5,6 +6,10 @@ from starlette.types import Receive, Scope, Send
 
 
 class CORSMiddlewarePath(CORSMiddleware):
+    """
+    This middleware is deprecated.
+    """
+
     def __init__(self, path_regex: str, *args, **kwargs) -> None:
         super().__init__(*args, **kwargs)
         self.path_regex = re.compile(path_regex)

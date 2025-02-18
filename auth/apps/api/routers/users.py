@@ -209,10 +209,10 @@ async def create_user_access_token(
     client_repository: ClientRepository = Depends(ClientRepository),
     audit_logger: AuditLogger = Depends(get_audit_logger),
 ) -> schemas.user.AccessTokenResponse:
-    tenant = user.tenant
-
     client = await client_repository.get_by_id(create_access_token.client_id)
-    if client is None or client.tenant_id != tenant.id:
+    tenant = client.tenant
+
+    if client is None:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=APIErrorCode.USER_CREATE_ACCESS_TOKEN_UNKNOWN_CLIENT,
@@ -221,8 +221,11 @@ async def create_user_access_token(
     tenant_host = tenant.get_host()
     permissions = await get_user_permissions(user)
 
+    for role in tenant.default_roles:
+        permissions.extend([permission.codename for permission in role.permissions])
+
     access_token = generate_access_token(
-        user.tenant.get_sign_jwk(),
+        tenant.get_sign_jwk(),
         tenant_host,
         client,
         datetime.now(UTC),
