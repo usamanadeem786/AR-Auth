@@ -8,6 +8,7 @@ from auth.repositories import (
     RefreshTokenRepository,
     RegistrationSessionRepository,
     SessionTokenRepository,
+    # OrganizationInvitationRepository,
 )
 from auth.repositories.base import ExpiresAtRepositoryProtocol
 from auth.tasks.base import TaskBase
@@ -20,6 +21,7 @@ repository_classes: list[type[ExpiresAtRepositoryProtocol]] = [
     RefreshTokenRepository,
     RegistrationSessionRepository,
     SessionTokenRepository,
+    # OrganizationInvitationRepository,
 ]
 
 

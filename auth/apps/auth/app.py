@@ -7,6 +7,7 @@ from auth.apps.auth.exception_handlers import exception_handlers
 from auth.apps.auth.routers.auth import router as auth_router
 from auth.apps.auth.routers.dashboard import router as dashboard_router
 from auth.apps.auth.routers.oauth import router as oauth_router
+from auth.apps.auth.routers.organizations import router as organizations_router
 from auth.apps.auth.routers.register import router as register_router
 from auth.apps.auth.routers.reset import router as reset_router
 from auth.apps.auth.routers.token import router as token_router
@@ -26,6 +27,7 @@ def include_routers(router: APIRouter) -> APIRouter:
     router.include_router(token_router, prefix="/api")
     router.include_router(user_router, prefix="/api")
     router.include_router(well_known_router, prefix="/.well-known")
+    router.include_router(organizations_router, prefix="/api")
     router.include_router(dashboard_router, include_in_schema=False)
 
     return router

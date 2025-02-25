@@ -13,18 +13,20 @@ from auth.models.login_session import LoginSession
 from auth.models.oauth_account import OAuthAccount
 from auth.models.oauth_provider import OAuthProvider
 from auth.models.oauth_session import OAuthSession
+from auth.models.organization import (Organization, OrganizationInvitation,
+                                      OrganizationMember,
+                                      OrganizationMemberRole)
 from auth.models.permission import Permission
 from auth.models.refresh_token import RefreshToken
-from auth.models.registration_session import (
-    RegistrationSession,
-    RegistrationSessionFlow,
-)
+from auth.models.registration_session import (RegistrationSession,
+                                              RegistrationSessionFlow)
 from auth.models.role import Role, RolePermission
 from auth.models.session_token import SessionToken
 from auth.models.tenant import Tenant
 from auth.models.theme import Theme
 from auth.models.user import User
-from auth.models.user_field import UserField, UserFieldConfiguration, UserFieldType
+from auth.models.user_field import (UserField, UserFieldConfiguration,
+                                    UserFieldType)
 from auth.models.user_field_value import UserFieldValue
 from auth.models.user_permission import UserPermission
 from auth.models.user_role import UserRole
@@ -68,4 +70,8 @@ __all__ = [
     "UserRole",
     "Webhook",
     "WebhookLog",
+    "Organization",
+    "OrganizationMember",
+    "OrganizationMemberRole",
+    "OrganizationInvitation",
 ]

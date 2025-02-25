@@ -6,28 +6,21 @@ from auth.db import AsyncEngine, AsyncSession
 from auth.db.main import create_main_async_session_maker
 from auth.dependencies.logger import get_audit_logger
 from auth.dependencies.users import get_user_manager
-from auth.models import AdminAPIKey, Client, Permission, Role, Tenant, Theme, User
-from auth.repositories import (
-    AdminAPIKeyRepository,
-    ClientRepository,
-    EmailTemplateRepository,
-    EmailVerificationRepository,
-    PermissionRepository,
-    RoleRepository,
-    TenantRepository,
-    ThemeRepository,
-    UserFieldRepository,
-    UserPermissionRepository,
-    UserRepository,
-    UserRoleRepository,
-)
+from auth.models import (AdminAPIKey, Client, Permission, Role, Tenant, Theme,
+                         User)
+from auth.repositories import (AdminAPIKeyRepository, ClientRepository,
+                               EmailTemplateRepository,
+                               EmailVerificationRepository,
+                               PermissionRepository, RoleRepository,
+                               TenantRepository, ThemeRepository,
+                               UserFieldRepository, UserPermissionRepository,
+                               UserRepository, UserRoleRepository)
 from auth.schemas.user import UserCreateAdmin
-from auth.services.admin import (
-    ADMIN_PERMISSION_CODENAME,
-    ADMIN_PERMISSION_NAME,
-    ADMIN_ROLE_NAME,
-)
+from auth.services.admin import (ADMIN_PERMISSION_CODENAME,
+                                 ADMIN_PERMISSION_NAME, ADMIN_ROLE_NAME)
 from auth.services.email_template.initializer import EmailTemplateInitializer
+from auth.services.organization import (ORGANIZATION_PERMISSIONS,
+                                        ORGANIZATION_ROLE_NAME)
 from auth.services.user_roles import UserRolesService
 from auth.services.webhooks.trigger import trigger_webhooks
 from auth.tasks import send_task
@@ -62,6 +55,7 @@ class Initializer:
         async with self.sessionmaker() as session:
             await self._init_default_tenant(session)
             await self._init_admin_role(session)
+            await self._init_organization_role(session)
             await self._init_default_theme(session)
             await self._init_email_templates(session)
 
@@ -240,6 +234,34 @@ class Initializer:
                     name=ADMIN_ROLE_NAME, permissions=[permission], user_permissions=[]
                 )
             )
+
+    async def _init_organization_role(self, session: AsyncSession) -> None:
+        role_repository = RoleRepository(session)
+        permission_repository = PermissionRepository(session)
+
+        permissions = []
+        for permission_name, permission_codename in ORGANIZATION_PERMISSIONS.items():
+            permission = await permission_repository.get_by_codename(
+                permission_codename
+            )
+            if permission is None:
+                permission = await permission_repository.create(
+                    Permission(name=permission_name, codename=permission_codename)
+                )
+            permissions.append(permission)
+
+        role = await role_repository.get_by_name(ORGANIZATION_ROLE_NAME)
+        if role is None:
+            await role_repository.create(
+                Role(
+                    name=ORGANIZATION_ROLE_NAME,
+                    permissions=permissions,
+                    user_permissions=[],
+                )
+            )
+        elif permissions and len(role.permissions) != len(permissions):
+            role.permissions = permissions
+            await role_repository.update(role)
 
     async def _init_default_theme(self, session: AsyncSession) -> None:
         repository = ThemeRepository(session)

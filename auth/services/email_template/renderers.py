@@ -9,11 +9,8 @@ if TYPE_CHECKING:  # pragma: no cover
     from auth.models import EmailTemplate
     from auth.repositories import EmailTemplateRepository
     from auth.services.email_template.contexts import (
-        EmailContext,
-        ForgotPasswordContext,
-        VerifyEmailContext,
-        WelcomeContext,
-    )
+        EmailContext, ForgotPasswordContext, OrganizationInvitationContext,
+        VerifyEmailContext, WelcomeContext)
 
 
 def _templates_list_to_map(
@@ -66,6 +63,13 @@ class EmailTemplateRenderer:
         self,
         type: Literal[EmailTemplateType.FORGOT_PASSWORD],
         context: "ForgotPasswordContext",
+    ) -> str: ...  # pragma: no cover
+
+    @overload
+    async def render(
+        self,
+        type: Literal[EmailTemplateType.ORGANIZATION_INVITATION],
+        context: "OrganizationInvitationContext",
     ) -> str: ...  # pragma: no cover
 
     async def render(self, type, context: "EmailContext") -> str:
@@ -131,6 +135,13 @@ class EmailSubjectRenderer:
         self,
         type: Literal[EmailTemplateType.FORGOT_PASSWORD],
         context: "ForgotPasswordContext",
+    ) -> str: ...  # pragma: no cover
+
+    @overload
+    async def render(
+        self,
+        type: Literal[EmailTemplateType.ORGANIZATION_INVITATION],
+        context: "OrganizationInvitationContext",
     ) -> str: ...  # pragma: no cover
 
     async def render(self, type, context: "EmailContext") -> str:

@@ -43,6 +43,14 @@ class EmailTemplateInitializer:
             )
             await self.repository.create(forgot_password)
 
+        if await self.repository.get_by_type(EmailTemplateType.ORGANIZATION_INVITATION) is None:
+            organization_invitation = EmailTemplate(
+                type=EmailTemplateType.ORGANIZATION_INVITATION,
+                subject="Join {{ organization_name }} on {{ tenant.name }}",
+                content=self._load_template("organization_invitation.html"),
+            )
+            await self.repository.create(organization_invitation)
+
     def _load_template(self, name: str) -> str:
         with open(self.templates_dir / name) as file:
             return file.read()

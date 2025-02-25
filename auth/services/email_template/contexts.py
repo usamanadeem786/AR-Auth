@@ -11,7 +11,7 @@ from auth.services.email_template.types import EmailTemplateType
 
 class EmailContext(BaseModel):
     tenant: Tenant
-    user: UserEmailContext
+    user: UserEmailContext | str
     model_config = ConfigDict(from_attributes=True)
 
     @classmethod
@@ -61,9 +61,22 @@ class ForgotPasswordContext(EmailContext):
         return context_kwargs
 
 
+class OrganizationInvitationContext(EmailContext):
+    organization_name: str
+    invitation_url: str
+
+    @classmethod
+    async def _get_sample_context_kwargs(cls, session: AsyncSession) -> dict[str, Any]:
+        context_kwargs = await super()._get_sample_context_kwargs(session)
+        context_kwargs["organization_name"] = "Example Organization"
+        context_kwargs["invitation_url"] = "https://example.auth.dev/invitation"
+        return context_kwargs
+
+
 EMAIL_TEMPLATE_CONTEXT_CLASS_MAP: dict[EmailTemplateType, type[EmailContext]] = {
     EmailTemplateType.BASE: EmailContext,
     EmailTemplateType.WELCOME: WelcomeContext,
     EmailTemplateType.VERIFY_EMAIL: VerifyEmailContext,
     EmailTemplateType.FORGOT_PASSWORD: ForgotPasswordContext,
+    EmailTemplateType.ORGANIZATION_INVITATION: OrganizationInvitationContext,
 }

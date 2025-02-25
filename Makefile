@@ -22,7 +22,7 @@ run-prod:
 
 # migrate: Run database migrations.
 migrate:
-	auth migrate
+	python -m auth.cli migrate
 
 # worker: Run the Dramatiq worker.
 worker:

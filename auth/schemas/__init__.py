@@ -15,6 +15,7 @@ from auth.schemas import (
     webhook,
     webhook_log,
     well_known,
+    organization,
 )
 
 __all__ = [
@@ -34,4 +35,5 @@ __all__ = [
     "webhook",
     "webhook_log",
     "well_known",
+    "organization",
 ]

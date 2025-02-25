@@ -217,6 +217,76 @@ class UserRoleDeleted(WebhookEventType):
     event = "deleted"
 
 
+class OrganizationCreated(WebhookEventType):
+    """Occurs whenever an Organization is created."""
+
+    object = "organization"
+    event = "created"
+
+
+class OrganizationUpdated(WebhookEventType):
+    """Occurs whenever an Organization is updated."""
+
+    object = "organization"
+    event = "updated"
+
+
+class OrganizationDeleted(WebhookEventType):
+    """Occurs whenever an Organization is deleted."""
+
+    object = "organization"
+    event = "deleted"
+
+
+class OrganizationMemberRemoved(WebhookEventType):
+    """Occurs whenever an Organization Member is removed."""
+
+    object = "organization_member"
+    event = "removed"
+
+
+class OrganizationMemberPermissionAdded(WebhookEventType):
+    """Occurs whenever an Organization Member's Permission is added."""
+
+    object = "organization_member"
+    event = "permission_added"
+
+
+class OrganizationMemberPermissionRemoved(WebhookEventType):
+    """Occurs whenever an Organization Member's Permission is removed."""
+
+    object = "organization_member"
+    event = "permission_removed"
+
+
+class OrganizationInvitationCreated(WebhookEventType):
+    """Occurs whenever an Organization Invitation is created."""
+
+    object = "organization_invitation"
+    event = "invitation_created"
+
+
+class OrganizationInvitationResend(WebhookEventType):
+    """Occurs whenever an Organization Invitation is resend."""
+
+    object = "organization_invitation"
+    event = "invitation_resend"
+
+
+class OrganizationInvitationRevoked(WebhookEventType):
+    """Occurs whenever an Organization Invitation is revoked."""
+
+    object = "organization_invitation"
+    event = "invitation_revoked"
+
+
+class OrganizationInvitationAccepted(WebhookEventType):
+    """Occurs whenever an Organization Invitation is accepted."""
+
+    object = "organization_invitation"
+    event = "invitation_accepted"
+
+
 WEBHOOK_EVENTS: list[type[WebhookEventType]] = [
     ClientCreated,
     ClientUpdated,
@@ -246,6 +316,15 @@ WEBHOOK_EVENTS: list[type[WebhookEventType]] = [
     UserPermissionDeleted,
     UserRoleCreated,
     UserRoleDeleted,
+    OrganizationCreated,
+    OrganizationUpdated,
+    OrganizationDeleted,
+    OrganizationMemberRemoved,
+    OrganizationMemberPermissionAdded,
+    OrganizationMemberPermissionRemoved,
+    OrganizationInvitationCreated,
+    OrganizationInvitationRevoked,
+    OrganizationInvitationAccepted,
 ]
 
 

@@ -8,6 +8,7 @@ from auth.tasks.register import on_after_register
 from auth.tasks.roles import on_role_updated
 from auth.tasks.user_roles import on_user_role_created, on_user_role_deleted
 from auth.tasks.webhooks import deliver_webhook, trigger_webhooks
+from auth.tasks.organization_invitation import on_after_organization_invitation
 
 __all__ = [
     "send_task",
@@ -23,4 +24,5 @@ __all__ = [
     "deliver_webhook",
     "trigger_webhooks",
     "write_audit_log",
+    "on_after_organization_invitation",
 ]

@@ -143,6 +143,9 @@ class Settings(BaseSettings):
     password_min_length: int = 8
     password_min_score: int = Field(ge=0, le=4, default=3)
 
+    organization_max_invitations: int = 10
+    organization_invitation_lifetime_seconds: int = 3600 * 24 * 7
+
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", secrets_dir=initial_settings.secrets_dir
     )

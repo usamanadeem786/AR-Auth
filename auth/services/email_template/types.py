@@ -6,6 +6,7 @@ class EmailTemplateType(StrEnum):
     WELCOME = "WELCOME"
     VERIFY_EMAIL = "VERIFY_EMAIL"
     FORGOT_PASSWORD = "FORGOT_PASSWORD"
+    ORGANIZATION_INVITATION = "ORGANIZATION_INVITATION"
 
     def get_display_name(self) -> str:
         display_names = {
@@ -13,5 +14,6 @@ class EmailTemplateType(StrEnum):
             EmailTemplateType.WELCOME: "Welcome",
             EmailTemplateType.VERIFY_EMAIL: "Verify email",
             EmailTemplateType.FORGOT_PASSWORD: "Forgot password",
+            EmailTemplateType.ORGANIZATION_INVITATION: "Organization invitation",
         }
         return display_names[self]

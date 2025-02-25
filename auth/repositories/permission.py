@@ -21,3 +21,7 @@ class PermissionRepository(BaseRepository[Permission], UUIDRepositoryMixin[Permi
         )
 
         return statement
+
+    async def get_by_ids(self, ids: list[UUID4]) -> list[Permission]:
+        statement = select(Permission).where(Permission.id.in_(ids))
+        return await self.list(statement)
