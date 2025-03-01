@@ -84,7 +84,7 @@ class OrganizationInvitationCreate(BaseOrganizationInvitation):
     email: EmailStr
     role: OrganizationRole
     permissions: list[UUID4] | None = None
-    client_id: str = Field(..., min_length=42, max_length=255)
+    client_id: str = Field(..., min_length=32, max_length=255)
     redirect_uri: HttpUrl | None = None
 
 
