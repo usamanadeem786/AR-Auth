@@ -7,22 +7,33 @@ from pydantic import UUID4
 from auth import schemas
 from auth.dependencies.webhooks import TriggerWebhooks
 from auth.logger import AuditLogger
-from auth.models import (AuditLogMessage, Organization, OrganizationInvitation,
-                         OrganizationMember, OrganizationRole, Tenant)
-from auth.repositories.organization import (OrganizationInvitationRepository,
-                                            OrganizationMemberRepository,
-                                            OrganizationRepository)
+from auth.models import (
+    AuditLogMessage,
+    Client,
+    Organization,
+    OrganizationInvitation,
+    OrganizationMember,
+    OrganizationRole,
+    Tenant,
+)
+from auth.repositories.organization import (
+    OrganizationInvitationRepository,
+    OrganizationMemberRepository,
+    OrganizationRepository,
+)
 from auth.repositories.permission import PermissionRepository
-from auth.services.webhooks.models import (OrganizationCreated,
-                                           OrganizationDeleted,
-                                           OrganizationInvitationAccepted,
-                                           OrganizationInvitationCreated,
-                                           OrganizationInvitationResend,
-                                           OrganizationInvitationRevoked,
-                                           OrganizationMemberPermissionAdded,
-                                           OrganizationMemberPermissionRemoved,
-                                           OrganizationMemberRemoved,
-                                           OrganizationUpdated)
+from auth.services.webhooks.models import (
+    OrganizationCreated,
+    OrganizationDeleted,
+    OrganizationInvitationAccepted,
+    OrganizationInvitationCreated,
+    OrganizationInvitationResend,
+    OrganizationInvitationRevoked,
+    OrganizationMemberPermissionAdded,
+    OrganizationMemberPermissionRemoved,
+    OrganizationMemberRemoved,
+    OrganizationUpdated,
+)
 from auth.settings import settings
 from auth.tasks import SendTask, on_after_organization_invitation
 
@@ -107,6 +118,18 @@ class InvitationMaxLimitReachedError(InvalidInvitationError):
 
 class OrganizationAccessDeniedError(OrganizationManagerError):
     """Raised when a user doesn't have access to an organization."""
+
+    pass
+
+
+class ClientNotFoundError(OrganizationManagerError):
+    """Raised when a client is not found."""
+
+    pass
+
+
+class InvalidClientRedirectUriError(OrganizationManagerError):
+    """Raised when a client redirect URI is invalid."""
 
     pass
 
@@ -256,6 +279,7 @@ class OrganizationManager:
         organization: Organization,
         invitation_create: schemas.organization.OrganizationInvitationCreate,
         tenant: Tenant,
+        client: Client,
     ) -> OrganizationInvitation:
         """Create and send organization invitation"""
         count_invitations = await self.invitation_repository.count_by_organization(
@@ -278,10 +302,14 @@ class OrganizationManager:
             permissions = []
 
         # Create invitation with organization reference
-        invitation = await self.invitation_repository.create_invitation(
-            organization_id=str(organization.id),
-            email=invitation_create.email,
-            permissions=permissions,
+        invitation = await self.invitation_repository.create(
+            OrganizationInvitation(
+                organization_id=str(organization.id),
+                email=invitation_create.email,
+                permissions=permissions,
+                client_id=client.id,
+                redirect_uri=invitation_create.redirect_uri,
+            )
         )
         await self.on_after_invitation_created(
             request, invitation, tenant, organization.name
@@ -339,7 +367,7 @@ class OrganizationManager:
         self,
         token: str,
         user_id: UUID4,
-    ) -> OrganizationMember:
+    ) -> OrganizationInvitation:
         """Accept invitation and add member"""
         # Get and validate invitation
         invitation = await self.get_invitation_by_token(token)
@@ -378,7 +406,7 @@ class OrganizationManager:
             await self.invitation_repository.update(invitation)
             await self.on_after_invitation_accepted(invitation)
 
-            return member
+            return invitation
 
         except Exception as e:
             # Re-raise known exceptions directly

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, EmailStr
+from pydantic import UUID4, BaseModel, EmailStr, HttpUrl, Field
 
 from auth.models.organization import OrganizationRole
 from auth.schemas.generics import CreatedUpdatedAt, UUIDSchema
@@ -84,6 +84,8 @@ class OrganizationInvitationCreate(BaseOrganizationInvitation):
     email: EmailStr
     role: OrganizationRole
     permissions: list[UUID4] | None = None
+    client_id: str = Field(..., min_length=42, max_length=255)
+    redirect_uri: HttpUrl | None = None
 
 
 class OrganizationInvitationUpdate(BaseOrganizationInvitation):

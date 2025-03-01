@@ -94,21 +94,6 @@ class OrganizationInvitationRepository(
 ):
     model = OrganizationInvitation
 
-    async def create_invitation(
-        self,
-        organization_id: str,
-        email: str,
-        permissions: list[Permission],
-    ) -> OrganizationInvitation:
-
-        invitation = OrganizationInvitation(
-            organization_id=organization_id,
-            email=email,
-            permissions=permissions,
-        )
-
-        return await self.create(invitation)
-
     async def get_by_email(self, email: str) -> Optional[OrganizationInvitation]:
         statement = select(self.model).where(self.model.email == email)
         result = await self.session.execute(statement)

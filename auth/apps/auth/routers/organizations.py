@@ -8,11 +8,13 @@ from auth.dependencies.organizations import (
     get_paginated_organization_members, get_paginated_organizations,
     require_organization_permission)
 from auth.dependencies.pagination import PaginatedObjects
+from auth.dependencies.repositories import get_repository
 from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.users import current_active_user
 from auth.errors import APIErrorCode
 from auth.models import (Organization, OrganizationInvitation,
-                         OrganizationMember, Tenant, User)
+                         OrganizationMember, Tenant)
+from auth.repositories import ClientRepository
 from auth.schemas.generics import PaginatedResults
 from auth.services.organization import (
     ORGANIZATION_DELETE_CODENAME, ORGANIZATION_INVITE_CODENAME,
@@ -22,10 +24,10 @@ from auth.services.organization import (
     ORGANIZATION_MEMBER_PERMISSION_REMOVE_CODENAME,
     ORGANIZATION_MEMBER_REMOVE_CODENAME, ORGANIZATION_UPDATE_CODENAME)
 from auth.services.organization_manager import (
-    InvalidInvitationError, InvitationAlreadyExistsError,
-    InvitationMaxLimitReachedError, OrganizationAlreadyExistsError,
-    OrganizationManager, OrganizationMemberAlreadyExistsError,
-    OrganizationMemberNotFoundError,
+    ClientNotFoundError, InvalidClientRedirectUriError, InvalidInvitationError,
+    InvitationAlreadyExistsError, InvitationMaxLimitReachedError,
+    OrganizationAlreadyExistsError, OrganizationManager,
+    OrganizationMemberAlreadyExistsError, OrganizationMemberNotFoundError,
     OrganizationMemberPermissionAlreadyExistsError,
     OrganizationMemberPermissionNotFoundError)
 
@@ -251,7 +253,7 @@ async def list_organization_invitations(
 
 @router.post(
     "/{id:uuid}/invitations",
-    response_model=schemas.organization.OrganizationInvitationCreate,
+    response_model=schemas.organization.OrganizationInvitationRead,
     status_code=status.HTTP_201_CREATED,
 )
 async def create_organization_invitation(
@@ -262,17 +264,26 @@ async def create_organization_invitation(
     ),
     organization_manager: OrganizationManager = Depends(get_organization_manager),
     tenant: Tenant = Depends(get_current_tenant),
+    client_repository: ClientRepository = Depends(get_repository(ClientRepository)),
 ):
     """Create invitation - requires invite permission"""
     try:
-        invitation = await organization_manager.create_invitation(
-            request, organization, invitation_create, tenant
+        client = await client_repository.get_by_client_id(invitation_create.client_id)
+        if client is None:
+            raise ClientNotFoundError()
+        if invitation_create.redirect_uri is not None:
+            if not str(invitation_create.redirect_uri) in client.redirect_uris:
+                raise InvalidClientRedirectUriError()
+        await organization_manager.create_invitation(
+            request, organization, invitation_create, tenant, client
         )
     except (
         InvalidInvitationError,
         OrganizationMemberAlreadyExistsError,
         InvitationAlreadyExistsError,
         InvitationMaxLimitReachedError,
+        ClientNotFoundError,
+        InvalidClientRedirectUriError,
     ) as e:
         if isinstance(e, OrganizationMemberAlreadyExistsError):
             error_code = APIErrorCode.ORGANIZATION_MEMBER_ALREADY_EXISTS
@@ -280,6 +291,10 @@ async def create_organization_invitation(
             error_code = APIErrorCode.ORGANIZATION_INVITATION_ALREADY_EXISTS
         elif isinstance(e, InvitationMaxLimitReachedError):
             error_code = APIErrorCode.ORGANIZATION_INVITATION_MAX_LIMIT_REACHED
+        elif isinstance(e, ClientNotFoundError):
+            error_code = APIErrorCode.CLIENT_NOT_FOUND
+        elif isinstance(e, InvalidClientRedirectUriError):
+            error_code = APIErrorCode.CLIENT_INVALID_REDIRECT_URI
         else:
             error_code = APIErrorCode.ORGANIZATION_INVITATION_INVALID
 
@@ -287,7 +302,7 @@ async def create_organization_invitation(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_code,
         )
-    return schemas.organization.OrganizationInvitationRead.model_validate(invitation)
+    return invitation_create.model_dump(exclude={"client_id", "redirect_uri"})
 
 
 @router.delete(

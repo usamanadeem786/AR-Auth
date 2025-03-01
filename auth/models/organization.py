@@ -1,6 +1,6 @@
 import secrets
 from enum import StrEnum
-from typing import TYPE_CHECKING, Optional
+from typing import Optional
 
 from pydantic import UUID4
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, Table, Text
@@ -8,14 +8,12 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.schema import UniqueConstraint
 
 from auth.models.base import TABLE_PREFIX, Base, get_prefixed_tablename
-from auth.models.generics import GUID, CreatedUpdatedAt, ExpiresAt, UUIDModel
+from auth.models.client import Client
+from auth.models.generics import (GUID, CreatedUpdatedAt, ExpiresAt,
+                                  PydanticUrlString, UUIDModel)
 from auth.models.permission import Permission
 from auth.models.user import User
 from auth.settings import settings
-
-if TYPE_CHECKING:
-    from auth.models.permission import Permission
-    from auth.models.user import User
 
 
 class OrganizationRole(StrEnum):
@@ -173,4 +171,15 @@ class OrganizationInvitation(UUIDModel, CreatedUpdatedAt, ExpiresAt, Base):
     )
     permissions: Mapped[list["Permission"]] = relationship(
         "Permission", secondary=OrganizationInvitationPermission, lazy="selectin"
+    )
+
+    # Client relation
+    client_id: Mapped[UUID4] = mapped_column(
+        GUID,
+        ForeignKey(f"{get_prefixed_tablename('clients')}.id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    client: Mapped["Client"] = relationship("Client", lazy="joined")
+    redirect_uri: Mapped[str | None] = mapped_column(
+        PydanticUrlString(String)(length=512), default=None, nullable=True
     )

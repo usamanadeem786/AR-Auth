@@ -1,3 +1,4 @@
+from auth_client import AuthAsync
 from fastapi import APIRouter, Depends, Query, Request, status
 from fastapi.responses import RedirectResponse
 
@@ -9,7 +10,7 @@ from auth.dependencies.tenant import get_current_tenant
 from auth.errors import APIErrorCode
 from auth.forms import FormHelper
 from auth.locale import gettext_lazy as _
-from auth.models import SessionToken, Tenant
+from auth.models import Client, SessionToken, Tenant
 from auth.services.organization_manager import (
     InvalidInvitationError, InvitationAlreadyAcceptedError,
     InvitationEmailMismatchError, InvitationExpiredError, OrganizationManager,
@@ -17,6 +18,15 @@ from auth.services.organization_manager import (
 from auth.settings import settings
 
 router = APIRouter()
+
+
+async def get_auth(tenant: Tenant, client: Client) -> AuthAsync:
+    auth = AuthAsync(
+        tenant.get_host(),
+        client.client_id,
+        client.client_secret,
+    )
+    return auth
 
 
 @router.api_route(
@@ -73,11 +83,21 @@ async def accept_invitation(
 
         # Handle POST request - accept invitation
         if request.method == "POST" and await form_helper.is_submitted_and_valid():
-            await organization_manager.accept_invitation(
+            invitation = await organization_manager.accept_invitation(
                 form.token.data, session_token.user_id
             )
+            if invitation.redirect_uri:
+                redirect_uri = invitation.redirect_uri
+            else:
+                redirect_uri = f"{tenant.application_url}/auth-callback"
+
+            auth = await get_auth(tenant, invitation.client)
+            auth_url = await auth.auth_url(
+                redirect_uri=redirect_uri,
+                scope=["openid"],
+            )
             return RedirectResponse(
-                url=f"{tenant.application_url}?invitation_accepted",
+                url=auth_url,
                 status_code=status.HTTP_302_FOUND,
             )
 
