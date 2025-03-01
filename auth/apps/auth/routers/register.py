@@ -80,10 +80,12 @@ async def register(
                 response, registration_session
             )
             response.set_cookie(
-                "user_already_exists",
+                settings.user_already_exists_cookie_name,
                 "exists",
-                domain=settings.registration_session_cookie_domain,
-                secure=settings.registration_session_cookie_secure,
+                max_age=settings.user_already_exists_cookie_lifetime_seconds,
+                domain=settings.user_already_exists_cookie_domain,
+                secure=settings.user_already_exists_cookie_secure,
+                httponly=True,
             )
             return response
         except UserDoesNotExistError:

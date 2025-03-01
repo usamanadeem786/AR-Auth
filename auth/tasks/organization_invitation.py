@@ -1,5 +1,3 @@
-import uuid
-
 import dramatiq
 
 from auth import schemas

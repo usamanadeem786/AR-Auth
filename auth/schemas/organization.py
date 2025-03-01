@@ -1,8 +1,8 @@
 from datetime import datetime
-from typing import Optional
 
-from pydantic import UUID4, BaseModel, ConfigDict, EmailStr, Field
+from pydantic import UUID4, BaseModel, EmailStr
 
+from auth.models.organization import OrganizationRole
 from auth.schemas.generics import CreatedUpdatedAt, UUIDSchema
 
 
@@ -58,6 +58,7 @@ class OrganizationMember(BaseOrganizationMember):
     organization_id: UUID4
     permissions: list[PermissionInfo] | None = None
     user: UserInfo
+    role: OrganizationRole
 
     class Config:
         from_attributes = True
@@ -69,11 +70,19 @@ class OrganizationMemberPermissionCreate(BaseModel):
 
 class BaseOrganizationInvitation(BaseModel):
     email: EmailStr
+    role: OrganizationRole
+
+
+class OrganizationInvitationRead(BaseOrganizationInvitation):
     permissions: list[PermissionInfo] | None = None
 
+    class Config:
+        from_attributes = True
 
-class OrganizationInvitationCreate(BaseModel):
+
+class OrganizationInvitationCreate(BaseOrganizationInvitation):
     email: EmailStr
+    role: OrganizationRole
     permissions: list[UUID4] | None = None
 
 

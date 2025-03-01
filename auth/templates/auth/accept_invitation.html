@@ -1,0 +1,29 @@
+{% import 'macros/forms.html' as forms %}
+
+{% extends "auth/layout.html" %}
+
+{% block head_title_content %}{{ _('Join Organization') }}{% endblock %}
+
+{% block title %}{{ _('Join Organization') }}{% endblock %}
+
+{% block auth_form %}
+  <div class="space-y-4">
+    <p class="text-gray-600">
+      {{ _("You've been invited to join") }} <span class="font-semibold">{{ organization_name }}</span>.
+    </p>
+
+    <form method="POST" action="{{ tenant.url_path_for(request, 'invitation:accept') }}" class="space-y-4">
+      {{ form.token }}
+      {{ forms.form_csrf_token(form) }}
+
+      <div class="flex items-center justify-between mt-6">
+        <a href="{{ tenant.get_host() }}" class="btn text-gray-600 hover:text-gray-900">
+          {{ _('Cancel') }}
+        </a>
+        <button type="submit" class="btn bg-primary hover:bg-primary-hover text-white">
+          {{ _('Accept Invitation') }}
+        </button>
+      </div>
+    </form>
+  </div>
+{% endblock %}

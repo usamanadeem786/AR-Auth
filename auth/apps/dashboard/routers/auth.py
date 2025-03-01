@@ -1,14 +1,15 @@
 import json
 
+from auth_client import AuthAccessTokenMissingPermission, AuthAsync
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from fastapi.responses import RedirectResponse
-from auth_client import AuthAccessTokenMissingPermission, AuthAsync
 
 from auth.crypto.token import generate_token
-from auth.dependencies.admin_authentication import is_authenticated_admin_session
+from auth.dependencies.admin_authentication import \
+    is_authenticated_admin_session
 from auth.dependencies.admin_session import get_admin_session_token
-from auth.dependencies.ssl import get_auth
 from auth.dependencies.repositories import get_repository
+from auth.dependencies.ssl import get_auth
 from auth.models import AdminSessionToken
 from auth.repositories import AdminSessionTokenRepository
 from auth.services.admin import ADMIN_PERMISSION_CODENAME

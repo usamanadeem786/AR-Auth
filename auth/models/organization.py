@@ -1,3 +1,4 @@
+import secrets
 from enum import StrEnum
 from typing import TYPE_CHECKING, Optional
 
@@ -17,7 +18,7 @@ if TYPE_CHECKING:
     from auth.models.user import User
 
 
-class OrganizationMemberRole(StrEnum):
+class OrganizationRole(StrEnum):
     OWNER = "owner"
     ADMIN = "admin"
     MEMBER = "member"
@@ -99,11 +100,11 @@ class OrganizationMember(UUIDModel, CreatedUpdatedAt, Base):
         ForeignKey(f"{get_prefixed_tablename('users')}.id", ondelete="CASCADE"),
         nullable=False,
     )
-    role: Mapped[OrganizationMemberRole] = mapped_column(
-        Enum(OrganizationMemberRole, name=f"{TABLE_PREFIX}organizationmemberrole"),
+    role: Mapped[OrganizationRole] = mapped_column(
+        Enum(OrganizationRole, name=f"{TABLE_PREFIX}organizationrole"),
         index=True,
         nullable=False,
-        default=OrganizationMemberRole.MEMBER,
+        default=OrganizationRole.MEMBER,
     )
 
     # Relationships
@@ -117,19 +118,19 @@ class OrganizationMember(UUIDModel, CreatedUpdatedAt, Base):
 
     @property
     def is_owner(self) -> bool:
-        return self.role == OrganizationMemberRole.OWNER
+        return self.role == OrganizationRole.OWNER
 
     @property
     def is_admin(self) -> bool:
-        return self.role == OrganizationMemberRole.ADMIN
+        return self.role == OrganizationRole.ADMIN
 
     @property
     def is_member(self) -> bool:
-        return self.role == OrganizationMemberRole.MEMBER
+        return self.role == OrganizationRole.MEMBER
 
     @property
     def is_owner_or_admin(self) -> bool:
-        return self.role in [OrganizationMemberRole.OWNER, OrganizationMemberRole.ADMIN]
+        return self.role in [OrganizationRole.OWNER, OrganizationRole.ADMIN]
 
     @property
     def permissions_codenames(self) -> list[str]:
@@ -151,7 +152,19 @@ class OrganizationInvitation(UUIDModel, CreatedUpdatedAt, ExpiresAt, Base):
         nullable=False,
     )
     email: Mapped[str] = mapped_column(String(320), nullable=False, index=True)
-    token: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    role: Mapped[OrganizationRole] = mapped_column(
+        Enum(OrganizationRole, name=f"{TABLE_PREFIX}organizationrole"),
+        index=True,
+        nullable=False,
+        default=OrganizationRole.MEMBER,
+    )
+    token: Mapped[str] = mapped_column(
+        String(255),
+        default=secrets.token_urlsafe,
+        unique=True,
+        index=True,
+        nullable=False,
+    )
     accepted: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
 
     # Relationships

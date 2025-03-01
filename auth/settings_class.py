@@ -143,8 +143,18 @@ class Settings(BaseSettings):
     password_min_length: int = 8
     password_min_score: int = Field(ge=0, le=4, default=3)
 
+    user_already_exists_cookie_name: str = "auth_user_already_exists"
+    user_already_exists_cookie_domain: str = ""
+    user_already_exists_cookie_secure: bool = True
+    user_already_exists_cookie_lifetime_seconds: int = 60
+
     organization_max_invitations: int = 10
     organization_invitation_lifetime_seconds: int = 3600 * 24 * 7
+
+    invitation_token_cookie_name: str = "auth_invitation_token"
+    invitation_token_cookie_domain: str = ""
+    invitation_token_cookie_secure: bool = True
+    invitation_token_cookie_lifetime_seconds: int = 3600 * 24
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", secrets_dir=initial_settings.secrets_dir

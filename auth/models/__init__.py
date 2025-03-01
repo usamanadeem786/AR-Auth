@@ -15,7 +15,7 @@ from auth.models.oauth_provider import OAuthProvider
 from auth.models.oauth_session import OAuthSession
 from auth.models.organization import (Organization, OrganizationInvitation,
                                       OrganizationMember,
-                                      OrganizationMemberRole)
+                                      OrganizationRole)
 from auth.models.permission import Permission
 from auth.models.refresh_token import RefreshToken
 from auth.models.registration_session import (RegistrationSession,
@@ -71,7 +71,7 @@ __all__ = [
     "Webhook",
     "WebhookLog",
     "Organization",
+    "OrganizationRole",
     "OrganizationMember",
-    "OrganizationMemberRole",
     "OrganizationInvitation",
 ]

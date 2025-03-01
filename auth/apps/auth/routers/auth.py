@@ -137,7 +137,7 @@ async def login(
     login_hint: LoginHint | None = Depends(get_login_hint),
     tenant: Tenant = Depends(get_current_tenant),
     context: BaseContext = Depends(get_base_context),
-    user_already_exists: str | None = Cookie(None, alias="user_already_exists"),
+    user_already_exists: str | None = Cookie(None, alias=settings.user_already_exists_cookie_name),
 ):
     # Prefill email with login_hint if it's a string
     initial_form_data = None
@@ -186,7 +186,7 @@ async def login(
             ),
             error_code="user_already_exists",
         )
-        response.delete_cookie("user_already_exists")
+        response.delete_cookie(settings.user_already_exists_cookie_name)
         return response
 
     return await form_helper.get_response()

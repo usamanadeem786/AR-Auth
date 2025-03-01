@@ -1,27 +1,25 @@
 from typing import TypedDict
 
-from fastapi import APIRouter, Depends, Header, Request, status
+from fastapi import APIRouter, Cookie, Depends, Header, Request, status
+from fastapi.responses import RedirectResponse
 
 from auth import schemas
 from auth.apps.auth.forms.password import ChangePasswordForm
-from auth.apps.auth.forms.profile import PF, ChangeEmailForm, get_profile_form_class
+from auth.apps.auth.forms.profile import (PF, ChangeEmailForm,
+                                          get_profile_form_class)
 from auth.apps.auth.forms.verify_email import VerifyEmailForm
 from auth.apps.auth.responses import HXLocationResponse
 from auth.dependencies.branding import get_show_branding
-from auth.dependencies.session_token import (
-    get_verified_email_user_from_session_token_or_verify,
-)
+from auth.dependencies.session_token import \
+    get_verified_email_user_from_session_token_or_verify
 from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.theme import get_current_theme
 from auth.dependencies.users import get_user_manager, get_user_update_model
 from auth.forms import FormHelper
 from auth.locale import gettext_lazy as _
 from auth.models import Tenant, Theme, User
-from auth.services.user_manager import (
-    InvalidEmailVerificationCodeError,
-    UserAlreadyExistsError,
-    UserManager,
-)
+from auth.services.user_manager import (InvalidEmailVerificationCodeError,
+                                        UserAlreadyExistsError, UserManager)
 from auth.settings import settings
 
 router = APIRouter()
@@ -61,7 +59,18 @@ async def update_profile(
         get_user_update_model
     ),
     context: BaseContext = Depends(get_base_context),
+    invitation_token: str | None = Cookie(
+        None, alias=settings.invitation_token_cookie_name
+    ),
 ):
+    if invitation_token:
+        response = RedirectResponse(
+            f"{context['tenant'].url_path_for(request, 'invitation:accept')}?token={invitation_token}",
+            status_code=status.HTTP_302_FOUND,
+        )
+        response.delete_cookie(settings.invitation_token_cookie_name)
+        return response
+
     form_helper = FormHelper(
         profile_form_class,
         "auth/dashboard/index.html",

@@ -20,7 +20,7 @@ from auth.dependencies.users import current_active_user
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.logger import AuditLogger
 from auth.models import (Organization, OrganizationInvitation,
-                         OrganizationMember, OrganizationMemberRole)
+                         OrganizationMember)
 from auth.repositories.organization import (OrganizationInvitationRepository,
                                             OrganizationMemberRepository,
                                             OrganizationRepository)
@@ -163,9 +163,7 @@ async def get_paginated_organization_invitations(
         OrganizationInvitation.organization_id == organization.id
     )
     if query is not None:
-        statement = statement.where(
-            OrganizationInvitation.email.ilike(f"%{query}%")
-        )
+        statement = statement.where(OrganizationInvitation.email.ilike(f"%{query}%"))
     return await get_paginated_objects(
         statement, pagination, ordering, invitation_repository
     )

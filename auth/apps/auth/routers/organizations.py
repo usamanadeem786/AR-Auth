@@ -1,18 +1,18 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
-from fastapi.responses import JSONResponse
 from pydantic import UUID4
 
 from auth import schemas
 from auth.dependencies.organizations import (
-    check_organization_permission, get_organization_by_id_or_404,
-    get_organization_invitation_by_id_or_404, get_organization_manager,
-    get_paginated_organization_invitations, get_paginated_organization_members,
-    get_paginated_organizations, require_organization_permission)
+    get_organization_by_id_or_404, get_organization_invitation_by_id_or_404,
+    get_organization_manager, get_paginated_organization_invitations,
+    get_paginated_organization_members, get_paginated_organizations,
+    require_organization_permission)
 from auth.dependencies.pagination import PaginatedObjects
+from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.users import current_active_user
 from auth.errors import APIErrorCode
 from auth.models import (Organization, OrganizationInvitation,
-                         OrganizationMember, User)
+                         OrganizationMember, Tenant, User)
 from auth.schemas.generics import PaginatedResults
 from auth.services.organization import (
     ORGANIZATION_DELETE_CODENAME, ORGANIZATION_INVITE_CODENAME,
@@ -22,10 +22,10 @@ from auth.services.organization import (
     ORGANIZATION_MEMBER_PERMISSION_REMOVE_CODENAME,
     ORGANIZATION_MEMBER_REMOVE_CODENAME, ORGANIZATION_UPDATE_CODENAME)
 from auth.services.organization_manager import (
-    InvalidInvitationError, InvitationAlreadyAcceptedError,
-    InvitationEmailMismatchError, InvitationExpiredError,
-    OrganizationAlreadyExistsError, OrganizationManager,
-    OrganizationMemberAlreadyExistsError, OrganizationMemberNotFoundError,
+    InvalidInvitationError, InvitationAlreadyExistsError,
+    InvitationMaxLimitReachedError, OrganizationAlreadyExistsError,
+    OrganizationManager, OrganizationMemberAlreadyExistsError,
+    OrganizationMemberNotFoundError,
     OrganizationMemberPermissionAlreadyExistsError,
     OrganizationMemberPermissionNotFoundError)
 
@@ -261,49 +261,33 @@ async def create_organization_invitation(
         require_organization_permission(ORGANIZATION_INVITE_CODENAME)
     ),
     organization_manager: OrganizationManager = Depends(get_organization_manager),
+    tenant: Tenant = Depends(get_current_tenant),
 ):
     """Create invitation - requires invite permission"""
-    return await organization_manager.create_invitation(
-        request, organization, invitation_create
-    )
-
-
-@router.post(
-    "/invitations/{token}/accept",
-    name="organization:accept_invitation",
-)
-async def accept_organization_invitation(
-    token: str,
-    current_user: User = Depends(current_active_user),
-    organization_manager: OrganizationManager = Depends(get_organization_manager),
-):
-    """Accept invitation - available to any authenticated user"""
     try:
-        invitation = await organization_manager.get_invitation_by_token(token)
-        if invitation.email != current_user.email:
-            raise InvitationEmailMismatchError(
-                "This invitation is for a different email address"
-            )
-        await organization_manager.accept_invitation(invitation, current_user.id)
-    except OrganizationMemberAlreadyExistsError:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=APIErrorCode.ORGANIZATION_MEMBER_ALREADY_EXISTS,
+        invitation = await organization_manager.create_invitation(
+            request, organization, invitation_create, tenant
         )
-    except InvalidInvitationError as e:
-        if isinstance(e, InvitationExpiredError):
-            error_code = APIErrorCode.ORGANIZATION_INVITATION_EXPIRED
-        elif isinstance(e, InvitationAlreadyAcceptedError):
-            error_code = APIErrorCode.ORGANIZATION_INVITATION_ALREADY_ACCEPTED
-        elif isinstance(e, InvitationEmailMismatchError):
-            error_code = APIErrorCode.ORGANIZATION_INVITATION_EMAIL_MISMATCH
+    except (
+        InvalidInvitationError,
+        OrganizationMemberAlreadyExistsError,
+        InvitationAlreadyExistsError,
+        InvitationMaxLimitReachedError,
+    ) as e:
+        if isinstance(e, OrganizationMemberAlreadyExistsError):
+            error_code = APIErrorCode.ORGANIZATION_MEMBER_ALREADY_EXISTS
+        elif isinstance(e, InvitationAlreadyExistsError):
+            error_code = APIErrorCode.ORGANIZATION_INVITATION_ALREADY_EXISTS
+        elif isinstance(e, InvitationMaxLimitReachedError):
+            error_code = APIErrorCode.ORGANIZATION_INVITATION_MAX_LIMIT_REACHED
         else:
             error_code = APIErrorCode.ORGANIZATION_INVITATION_INVALID
+
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=error_code,
-        ) from e
-    return {"message": "Invitation accepted successfully"}
+        )
+    return schemas.organization.OrganizationInvitationRead.model_validate(invitation)
 
 
 @router.delete(
@@ -344,15 +328,62 @@ async def resend_organization_invitation(
         require_organization_permission(ORGANIZATION_INVITE_RESEND_CODENAME)
     ),
     organization_manager: OrganizationManager = Depends(get_organization_manager),
+    tenant: Tenant = Depends(get_current_tenant),
 ):
     """Resend invitation - requires invite management permission"""
     try:
         if invitation.organization_id != organization.id:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-        await organization_manager.resend_invitation(request, invitation)
+        await organization_manager.resend_invitation(request, invitation, tenant)
     except InvalidInvitationError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=APIErrorCode.ORGANIZATION_INVITATION_INVALID,
         )
     return {"message": "Invitation resent successfully"}
+
+
+# @router.post(
+#     "/invitations/{token}/accept",
+#     name="organization:accept_invitation",
+# )
+# async def accept_organization_invitation(
+#     token: str,
+#     current_user: User = Depends(current_active_user),
+#     organization_manager: OrganizationManager = Depends(get_organization_manager),
+#     tenant: Tenant = Depends(get_current_tenant),
+# ):
+#     """Accept invitation - available to any authenticated user"""
+#     try:
+#         await organization_manager.accept_invitation(
+#             token,
+#             current_user.id,
+#             tenant,
+#             request=None
+#         )
+#     except OrganizationMemberAlreadyExistsError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=APIErrorCode.ORGANIZATION_MEMBER_ALREADY_EXISTS,
+#         )
+#     except InvitationExpiredError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=APIErrorCode.ORGANIZATION_INVITATION_EXPIRED,
+#         )
+#     except InvitationAlreadyAcceptedError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=APIErrorCode.ORGANIZATION_INVITATION_ALREADY_ACCEPTED,
+#         )
+#     except InvitationEmailMismatchError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=APIErrorCode.ORGANIZATION_INVITATION_EMAIL_MISMATCH,
+#         )
+#     except InvalidInvitationError:
+#         raise HTTPException(
+#             status_code=status.HTTP_400_BAD_REQUEST,
+#             detail=APIErrorCode.ORGANIZATION_INVITATION_INVALID,
+#         )
+#     return {"message": "Invitation accepted successfully"}

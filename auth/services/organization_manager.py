@@ -1,5 +1,4 @@
 from datetime import UTC, datetime, timedelta
-from typing import Optional
 
 from fastapi import Request
 from furl import furl
@@ -9,7 +8,7 @@ from auth import schemas
 from auth.dependencies.webhooks import TriggerWebhooks
 from auth.logger import AuditLogger
 from auth.models import (AuditLogMessage, Organization, OrganizationInvitation,
-                         OrganizationMember, OrganizationMemberRole, Tenant)
+                         OrganizationMember, OrganizationRole, Tenant)
 from auth.repositories.organization import (OrganizationInvitationRepository,
                                             OrganizationMemberRepository,
                                             OrganizationRepository)
@@ -30,62 +29,85 @@ from auth.tasks import SendTask, on_after_organization_invitation
 
 class OrganizationManagerError(Exception):
     """Base exception for organization manager errors."""
+
     pass
 
 
 class OrganizationNotFoundError(OrganizationManagerError):
     """Raised when an organization is not found."""
+
     pass
 
 
 class OrganizationAlreadyExistsError(OrganizationManagerError):
     """Raised when attempting to create an organization that already exists."""
+
     pass
 
 
 class OrganizationMemberNotFoundError(OrganizationManagerError):
     """Raised when a member is not found in the organization."""
+
     pass
 
 
 class OrganizationMemberAlreadyExistsError(OrganizationManagerError):
     """Raised when a member already exists in the organization."""
+
     pass
 
 
 class OrganizationMemberPermissionNotFoundError(OrganizationManagerError):
     """Raised when a permission is not found for a member."""
+
     pass
 
 
 class OrganizationMemberPermissionAlreadyExistsError(OrganizationManagerError):
     """Raised when a permission already exists for a member."""
+
     pass
 
 
 class InvalidInvitationError(OrganizationManagerError):
     """Base class for invitation-related errors."""
-    def __init__(self, message: str) -> None:
-        super().__init__(message)
-        self.message = message
+
+    pass
 
 
 class InvitationExpiredError(InvalidInvitationError):
     """Raised when an invitation has expired."""
+
     pass
 
 
 class InvitationAlreadyAcceptedError(InvalidInvitationError):
     """Raised when an invitation has already been accepted."""
+
     pass
 
 
 class InvitationEmailMismatchError(InvalidInvitationError):
     """Raised when the invitation email doesn't match the user's email."""
+
+    pass
+
+
+class InvitationAlreadyExistsError(InvalidInvitationError):
+    """Raised when the invitation already exists."""
+
+    pass
+
+
+class InvitationMaxLimitReachedError(InvalidInvitationError):
+    """Raised when the invitation max limit has been reached."""
+
     pass
 
 
 class OrganizationAccessDeniedError(OrganizationManagerError):
+    """Raised when a user doesn't have access to an organization."""
+
     pass
 
 
@@ -136,7 +158,7 @@ class OrganizationManager:
         member = OrganizationMember(
             organization_id=organization.id,
             user_id=user_id,
-            role=OrganizationMemberRole.OWNER,
+            role=OrganizationRole.OWNER,
         )
         await self.member_repository.create(member)
 
@@ -233,13 +255,20 @@ class OrganizationManager:
         request: Request,
         organization: Organization,
         invitation_create: schemas.organization.OrganizationInvitationCreate,
+        tenant: Tenant,
     ) -> OrganizationInvitation:
         """Create and send organization invitation"""
+        count_invitations = await self.invitation_repository.count_by_organization(
+            organization.id
+        )
+        if count_invitations >= settings.organization_max_invitations:
+            raise InvitationMaxLimitReachedError()
+
         invitation_exists = await self.invitation_repository.get_by_email(
             invitation_create.email
         )
         if invitation_exists:
-            raise InvalidInvitationError("Invitation already exists")
+            raise InvitationAlreadyExistsError()
 
         if invitation_create.permissions:
             permissions = await self.permission_repository.get_by_ids(
@@ -254,13 +283,9 @@ class OrganizationManager:
             email=invitation_create.email,
             permissions=permissions,
         )
-        user = await self.organization_repository.get_user_with_tenant(
-            organization.user_id
+        await self.on_after_invitation_created(
+            request, invitation, tenant, organization.name
         )
-        if user and user.tenant:
-            await self.on_after_invitation_created(
-                request, invitation, user.tenant, organization.name
-            )
         return invitation
 
     async def revoke_invitation(
@@ -275,6 +300,7 @@ class OrganizationManager:
         self,
         request: Request,
         invitation: OrganizationInvitation,
+        tenant: Tenant,
     ) -> None:
         """Resend an organization invitation"""
         # Reset expiry time
@@ -287,59 +313,86 @@ class OrganizationManager:
         organization = await self.organization_repository.get_by_id(
             invitation.organization_id
         )
-        user = await self.organization_repository.get_user_with_tenant(
-            organization.user_id
+        await self.on_after_invitation_resend(
+            request, invitation, tenant, organization.name
         )
-
-        if user and user.tenant:
-            await self.on_after_invitation_resend(
-                request, invitation, user.tenant, organization.name
-            )
+        return invitation
 
     async def get_invitation_by_token(self, token: str) -> OrganizationInvitation:
-        """Get invitation by token"""
+        """Get invitation"""
+
         invitation = await self.invitation_repository.get_by_token(token)
         if invitation is None:
-            raise InvalidInvitationError("Invitation not found")
+            raise InvalidInvitationError()
+
+        # Check if expired
+        if invitation.is_expired:
+            raise InvitationExpiredError()
+
+        # Check if already accepted
+        if invitation.accepted:
+            raise InvitationAlreadyAcceptedError()
+
         return invitation
 
     async def accept_invitation(
         self,
-        invitation: OrganizationInvitation,
+        token: str,
         user_id: UUID4,
     ) -> OrganizationMember:
         """Accept invitation and add member"""
-        if invitation.accepted:
-            raise InvalidInvitationError("Invitation already accepted")
+        # Get and validate invitation
+        invitation = await self.get_invitation_by_token(token)
 
-        if invitation.expires_at < datetime.now(UTC):
-            raise InvalidInvitationError("Invitation expired")
+        try:
+            # Get user to check email match
+            user = await self.organization_repository.get_user_with_tenant(user_id)
+            if user.email != invitation.email:
+                raise InvitationEmailMismatchError()
 
-        # Create member with basic role
-        member = OrganizationMember(
-            organization_id=invitation.organization_id,
-            user_id=user_id,
-        )
-        member = await self.member_repository.create(member)
-
-        # Assign direct permissions
-        if invitation.permissions:
-            permissions = await self.permission_repository.get_by_ids(
-                invitation.permissions
+            # Check if user is already a member
+            existing_member = await self.member_repository.get_by_user_and_org(
+                str(user_id), str(invitation.organization_id)
             )
-            member.permissions.extend(permissions)
+            if existing_member is not None:
+                raise OrganizationMemberAlreadyExistsError()
 
-        await self.member_repository.update(member)
+            # Create member with basic role
+            member = OrganizationMember(
+                organization_id=invitation.organization_id,
+                user_id=user_id,
+                role=invitation.role,
+            )
+            member = await self.member_repository.create(member)
 
-        # Mark invitation as accepted
-        invitation.accepted = True
-        await self.invitation_repository.update(invitation)
+            # Assign direct permissions
+            if invitation.permissions:
+                permissions = await self.permission_repository.get_by_ids(
+                    invitation.permissions
+                )
+                member.permissions.extend(permissions)
+                await self.member_repository.update(member)
 
-        await self.on_after_invitation_accepted(invitation)
+            # Mark invitation as accepted
+            invitation.accepted = True
+            await self.invitation_repository.update(invitation)
+            await self.on_after_invitation_accepted(invitation)
 
-    async def get_invitation_by_id(self, id: UUID4) -> Optional[OrganizationInvitation]:
-        """Get invitation by ID"""
-        return await self.invitation_repository.get_by_id(id)
+            return member
+
+        except Exception as e:
+            # Re-raise known exceptions directly
+            if isinstance(
+                e,
+                (
+                    InvitationEmailMismatchError,
+                    OrganizationMemberAlreadyExistsError,
+                    InvalidInvitationError,
+                ),
+            ):
+                raise
+            # Otherwise wrap in a general InvalidInvitationError
+            raise InvalidInvitationError() from e
 
     # Event handlers
     async def on_after_create(
@@ -419,6 +472,36 @@ class OrganizationManager:
             OrganizationMemberRemoved, member, schemas.organization.OrganizationMember
         )
 
+    async def on_after_invitation_revoked(
+        self,
+        invitation: OrganizationInvitation,
+    ):
+        self.audit_logger(
+            AuditLogMessage.ORGANIZATION_INVITATION_REVOKED,
+            object_id=str(invitation.organization_id),
+            email=invitation.email,
+        )
+        self.trigger_webhooks(
+            OrganizationInvitationRevoked,
+            invitation,
+            schemas.organization.OrganizationInvitation,
+        )
+
+    async def on_after_invitation_accepted(
+        self,
+        invitation: OrganizationInvitation,
+    ):
+        self.audit_logger(
+            AuditLogMessage.ORGANIZATION_INVITATION_ACCEPTED,
+            object_id=str(invitation.id),
+            email=invitation.email,
+        )
+        self.trigger_webhooks(
+            OrganizationInvitationAccepted,
+            invitation,
+            schemas.organization.OrganizationInvitation,
+        )
+
     async def on_after_invitation_created(
         self,
         request: Request,
@@ -436,11 +519,8 @@ class OrganizationManager:
             invitation,
             schemas.organization.OrganizationInvitation,
         )
-        invitation_url = furl(
-            tenant.url_for(
-                request, "organization:accept_invitation", token=invitation.token
-            )
-        )
+        invitation_url = furl(tenant.url_for(request, "invitation:accept"))
+        invitation_url.add(query_params={"token": invitation.token})
 
         # Send invitation email asynchronously
         self.send_task(
@@ -449,21 +529,6 @@ class OrganizationManager:
             str(tenant.id),
             organization_name,
             invitation_url.url,
-        )
-
-    async def on_after_invitation_revoked(
-        self,
-        invitation: OrganizationInvitation,
-    ):
-        self.audit_logger(
-            AuditLogMessage.ORGANIZATION_INVITATION_REVOKED,
-            object_id=str(invitation.organization_id),
-            email=invitation.email,
-        )
-        self.trigger_webhooks(
-            OrganizationInvitationRevoked,
-            invitation,
-            schemas.organization.OrganizationInvitation,
         )
 
     async def on_after_invitation_resend(
@@ -484,11 +549,8 @@ class OrganizationManager:
             schemas.organization.OrganizationInvitation,
         )
 
-        invitation_url = furl(
-            tenant.url_for(
-                request, "organization:accept_invitation", token=invitation.token
-            )
-        )
+        invitation_url = furl(tenant.url_for(request, "invitation:accept"))
+        invitation_url.add(query_params={"token": invitation.token})
 
         # Send invitation email asynchronously
         self.send_task(
@@ -497,19 +559,4 @@ class OrganizationManager:
             str(tenant.id),
             organization_name,
             invitation_url.url,
-        )
-
-    async def on_after_invitation_accepted(
-        self,
-        invitation: OrganizationInvitation,
-    ):
-        self.audit_logger(
-            AuditLogMessage.ORGANIZATION_INVITATION_ACCEPTED,
-            object_id=str(invitation.id),
-            email=invitation.email,
-        )
-        self.trigger_webhooks(
-            OrganizationInvitationAccepted,
-            invitation,
-            schemas.organization.OrganizationInvitation,
         )

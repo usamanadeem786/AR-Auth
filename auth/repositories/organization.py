@@ -8,9 +8,9 @@ from sqlalchemy.orm import joinedload
 from auth.models.organization import (Organization, OrganizationInvitation,
                                       OrganizationMember)
 from auth.models.permission import Permission
+from auth.models.user import User
 from auth.repositories.base import (BaseRepository, ExpiresAtMixin,
                                     UUIDRepositoryMixin)
-from auth.models.user import User
 
 
 class OrganizationRepository(
@@ -100,12 +100,10 @@ class OrganizationInvitationRepository(
         email: str,
         permissions: list[Permission],
     ) -> OrganizationInvitation:
-        token = secrets.token_urlsafe(32)
 
         invitation = OrganizationInvitation(
             organization_id=organization_id,
             email=email,
-            token=token,
             permissions=permissions,
         )
 
@@ -134,3 +132,9 @@ class OrganizationInvitationRepository(
         )
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
+
+    async def count_by_organization(self, organization_id: UUID4) -> int:
+        statement = select(self.model).where(
+            self.model.organization_id == organization_id
+        )
+        return await self._count(statement)
