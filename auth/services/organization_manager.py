@@ -7,33 +7,23 @@ from pydantic import UUID4
 from auth import schemas
 from auth.dependencies.webhooks import TriggerWebhooks
 from auth.logger import AuditLogger
-from auth.models import (
-    AuditLogMessage,
-    Client,
-    Organization,
-    OrganizationInvitation,
-    OrganizationMember,
-    OrganizationRole,
-    Tenant,
-)
-from auth.repositories.organization import (
-    OrganizationInvitationRepository,
-    OrganizationMemberRepository,
-    OrganizationRepository,
-)
+from auth.models import (AuditLogMessage, Client, Organization,
+                         OrganizationInvitation, OrganizationMember,
+                         OrganizationRole, Tenant)
+from auth.repositories.organization import (OrganizationInvitationRepository,
+                                            OrganizationMemberRepository,
+                                            OrganizationRepository)
 from auth.repositories.permission import PermissionRepository
-from auth.services.webhooks.models import (
-    OrganizationCreated,
-    OrganizationDeleted,
-    OrganizationInvitationAccepted,
-    OrganizationInvitationCreated,
-    OrganizationInvitationResend,
-    OrganizationInvitationRevoked,
-    OrganizationMemberPermissionAdded,
-    OrganizationMemberPermissionRemoved,
-    OrganizationMemberRemoved,
-    OrganizationUpdated,
-)
+from auth.services.webhooks.models import (OrganizationCreated,
+                                           OrganizationDeleted,
+                                           OrganizationInvitationAccepted,
+                                           OrganizationInvitationCreated,
+                                           OrganizationInvitationResend,
+                                           OrganizationInvitationRevoked,
+                                           OrganizationMemberPermissionAdded,
+                                           OrganizationMemberPermissionRemoved,
+                                           OrganizationMemberRemoved,
+                                           OrganizationUpdated)
 from auth.settings import settings
 from auth.tasks import SendTask, on_after_organization_invitation
 
@@ -223,6 +213,13 @@ class OrganizationManager:
             raise OrganizationMemberNotFoundError()
 
         await self.member_repository.delete(member)
+
+        invitation = await self.invitation_repository.get_by_email_and_org(
+            member.user.email, organization.id
+        )
+        if invitation:
+            await self.invitation_repository.delete(invitation)
+
         await self.on_after_member_removed(member)
 
     async def add_permission(
@@ -288,8 +285,8 @@ class OrganizationManager:
         if count_invitations >= settings.organization_max_invitations:
             raise InvitationMaxLimitReachedError()
 
-        invitation_exists = await self.invitation_repository.get_by_email(
-            invitation_create.email
+        invitation_exists = await self.invitation_repository.get_by_email_and_org(
+            invitation_create.email, organization.id
         )
         if invitation_exists:
             raise InvitationAlreadyExistsError()
@@ -497,7 +494,9 @@ class OrganizationManager:
             user_id=str(member.user_id),
         )
         self.trigger_webhooks(
-            OrganizationMemberRemoved, member, schemas.organization.OrganizationMember
+            OrganizationMemberRemoved,
+            member,
+            schemas.organization.OrganizationMember,
         )
 
     async def on_after_invitation_revoked(

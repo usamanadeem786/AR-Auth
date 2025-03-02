@@ -1,5 +1,6 @@
 from pydantic import UUID4
 from sqlalchemy import select
+from sqlalchemy.orm import joinedload
 
 from auth.models import User
 from auth.repositories.base import BaseRepository, UUIDRepositoryMixin
@@ -23,7 +24,9 @@ class UserRepository(BaseRepository[User], UUIDRepositoryMixin[User]):
         return await self.get_one_or_none(statement)
 
     async def get_by_email(self, email: str) -> User | None:
-        statement = select(User).where(User.email == email)
+        statement = (
+            select(User).where(User.email == email).options(joinedload(User.tenant))
+        )
         return await self.get_one_or_none(statement)
 
     async def get_one_by_tenant(self, tenant: UUID4) -> User | None:

@@ -70,8 +70,13 @@ class OrganizationMemberRepository(
     async def get_by_user_and_org(
         self, user_id: str, organization_id: str
     ) -> Optional[OrganizationMember]:
-        statement = select(self.model).where(
-            self.model.user_id == user_id, self.model.organization_id == organization_id
+        statement = (
+            select(self.model)
+            .where(
+                self.model.user_id == user_id,
+                self.model.organization_id == organization_id,
+            )
+            .options(joinedload(self.model.user))
         )
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
@@ -94,8 +99,12 @@ class OrganizationInvitationRepository(
 ):
     model = OrganizationInvitation
 
-    async def get_by_email(self, email: str) -> Optional[OrganizationInvitation]:
-        statement = select(self.model).where(self.model.email == email)
+    async def get_by_email_and_org(
+        self, email: str, organization_id: UUID4
+    ) -> Optional[OrganizationInvitation]:
+        statement = select(self.model).where(
+            self.model.email == email, self.model.organization_id == organization_id
+        )
         result = await self.session.execute(statement)
         return result.scalar_one_or_none()
 

@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from pydantic import UUID4, BaseModel, EmailStr, HttpUrl, Field
+from pydantic import UUID4, BaseModel, EmailStr, Field, HttpUrl
 
 from auth.models.organization import OrganizationRole
 from auth.schemas.generics import CreatedUpdatedAt, UUIDSchema
