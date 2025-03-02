@@ -203,7 +203,7 @@ class UserManager:
             "password_fgpt": self.password_helper.hash(user.hashed_password),
             "aud": RESET_PASSWORD_TOKEN_AUDIENCE,
         }
-        signing_key = user.tenant.get_sign_jwk()
+        signing_key = await user.tenant.get_sign_jwk()
         token = jwt.JWT(
             header={"alg": "RS256", "kid": signing_key["kid"]}, claims=claims
         )
