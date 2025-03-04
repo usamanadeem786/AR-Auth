@@ -1,0 +1,5 @@
+{% import "macros/forms.html" as forms %}
+
+{% call(subscription_plan) forms.form_combobox_select_field_results(subscription_plans, "id", "name", "No subscription plan is matching your query.") %}
+  {{ subscription_plan.name }}
+{% endcall %}

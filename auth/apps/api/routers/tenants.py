@@ -155,7 +155,6 @@ async def update_tenant(
                 )
             tenant.oauth_providers.append(oauth_provider)
 
-    print("Default roles:", tenant_update.default_roles)
     if tenant_update.default_roles is not None:
         tenant.default_roles = []
         for role_id in tenant_update.default_roles:

@@ -13,6 +13,7 @@ if TYPE_CHECKING:
     from auth.models.user_field_value import UserFieldValue
     from auth.models.user_permission import UserPermission
     from auth.models.user_role import UserRole
+    from auth.models.user_subscription import UserSubscription
 
 
 class User(UUIDModel, CreatedUpdatedAt, Base):
@@ -41,6 +42,10 @@ class User(UUIDModel, CreatedUpdatedAt, Base):
         cascade="all, delete",
         lazy="selectin",
     )
+
+    # subscriptions: Mapped[list["UserSubscription"]] = relationship(
+    #     "UserSubscription", back_populates="user", cascade="all, delete-orphan"
+    # )
 
     def __repr__(self) -> str:
         return f"User(id={self.id}, email={self.email})"

@@ -1,0 +1,124 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/alerts.html" as alerts %}
+
+{% extends "admin/users/get/base.html" %}
+
+{% block head_title_content %}{{ user.email }} · Subscriptions · {{ super() }}{% endblock %}
+
+{% block tab %}
+<div class="mt-6">
+  <h3 class="text-slate-800 font-semibold mb-4">Active Subscriptions</h3>
+
+  {% if user_subscriptions %}
+    <div class="bg-white shadow-lg rounded-sm border border-slate-200 mb-6">
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full">
+          <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-50 border-t border-b border-slate-200">
+            <tr>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Plan</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Expires</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-right">Actions</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-slate-200">
+            {% for subscription in user_subscriptions %}
+              <tr>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="font-medium text-slate-800">
+                    <a href="{{ url_for('dashboard.subscription_plans:get', id=subscription.subscription_plan.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
+                      {{ subscription.subscription_plan.name }}
+                    </a>
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if subscription.expires_at %}
+                      {{ subscription.expires_at.strftime('%Y-%m-%d %H:%M') }}
+                    {% else %}
+                      <span class="italic text-slate-500">Never</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-right">
+                    <form method="POST" action="{{ url_for('dashboard.user_subscriptions:remove', id=user.id, plan_id=subscription.subscription_plan.id) }}">
+                      <button type="submit" class="btn-xs bg-red-500 hover:bg-red-600 text-white">
+                        Remove
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    {% call alerts.info() %}
+      <p>This user doesn't have any active subscriptions.</p>
+    {% endcall %}
+  {% endif %}
+
+  {% if available_plans %}
+    <h3 class="text-slate-800 font-semibold mb-4 mt-8">Add Subscription</h3>
+    <div class="bg-white shadow-lg rounded-sm border border-slate-200 mb-6">
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full">
+          <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-50 border-t border-b border-slate-200">
+            <tr>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Plan</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Expiry (days)</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-right">Actions</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-slate-200">
+            {% for plan in available_plans %}
+              <tr>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="font-medium text-slate-800">
+                    <a href="{{ url_for('dashboard.subscription_plans:get', id=plan.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
+                      {{ plan.name }}
+                    </a>
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if plan.expiry_days %}
+                      {{ plan.expiry_days }}
+                    {% else %}
+                      <span class="italic text-slate-500">Never</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-right">
+                    <form method="POST" action="{{ url_for('dashboard.user_subscriptions:add', id=user.id, plan_id=plan.id) }}">
+                      <button type="submit" class="btn-xs bg-primary-500 hover:bg-primary-600 text-white">
+                        Add
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

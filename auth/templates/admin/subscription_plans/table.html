@@ -1,0 +1,41 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/datatable.html" as datatable %}
+
+{% macro name_column(subscription_plan) %}
+<a
+  class="font-medium text-slate-800 hover:text-slate-900"
+  href="{{ url_for('dashboard.subscription_plans:get', id=subscription_plan.id) }}"
+  hx-boost="true"
+  hx-target="#aside"
+  _="install OpenAside"
+>
+  {{ subscription_plan.name }}
+</a>
+{% endmacro %}
+
+{% macro granted_by_default_column(subscription_plan) %}
+{% if subscription_plan.granted_by_default %}
+  {{ icons.check('w-4 h-4') }}
+{% else %}
+  {{ icons.x_mark('w-4 h-4') }}
+{% endif %}
+{% endmacro %}
+
+{% macro expiry_interval_column(subscription_plan) %}
+{{ subscription_plan.expiry_interval }}
+{% endmacro %}
+
+{% macro expiry_unit_column(subscription_plan) %}
+{{ subscription_plan.expiry_unit.value }}
+{% endmacro %}
+
+{{
+  datatable.datatable(
+    subscription_plans,
+    count,
+    datatable_query_parameters,
+    "Subscription Plans",
+    columns | map("get_column_macro") | list,
+  )
+}}

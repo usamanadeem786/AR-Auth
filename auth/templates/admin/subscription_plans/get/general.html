@@ -1,0 +1,77 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/icons.html" as icons %}
+
+{% extends "admin/subscription_plans/get/base.html" %}
+
+{% block tab %}
+<div class="mt-6">
+  <ul>
+    <li class="flex items-center justify-between py-3 border-b border-slate-200">
+      <div class="text-sm whitespace-nowrap">Name</div>
+      <div class="text-sm font-medium text-slate-800 ml-2 truncate">{{ subscription_plan.name }}</div>
+    </li>
+    <li class="flex items-center justify-between py-3 border-b border-slate-200">
+      <div class="text-sm whitespace-nowrap">Granted by default</div>
+      <div class="text-sm font-medium text-slate-800 ml-2 truncate">
+        {% if subscription_plan.granted_by_default %}
+          {{ icons.check('w-4 h-4') }}
+        {% else %}
+          {{ icons.x_mark('w-4 h-4') }}
+        {% endif %}
+      </div>
+    </li>
+    <li class="flex items-center justify-between py-3 border-b border-slate-200">
+      <div class="text-sm whitespace-nowrap">Expiry ({{ subscription_plan.expiry_unit.get_display_name() }})</div>
+      <div class="text-sm font-medium text-slate-800 ml-2 truncate">
+        {% if subscription_plan.expiry_interval %}
+          {{ subscription_plan.expiry_interval }}
+        {% else %}
+          <span class="italic">No expiry</span>
+        {% endif %}
+      </div>
+    </li>
+    <li class="flex items-center justify-between py-3 border-b border-slate-200">
+      <div class="text-sm whitespace-nowrap">Details</div>
+      <div class="text-sm font-medium text-slate-800 ml-2 truncate">
+        {% if subscription_plan.details %}
+          {{ subscription_plan.details }}
+        {% else %}
+          <span class="italic">No details</span>
+        {% endif %}
+      </div>
+    </li>
+  </ul>
+</div>
+{% if subscription_plan.roles %}
+  <div class="mt-6">
+    <div class="text-sm font-semibold text-slate-800 mb-1">Roles</div>
+    <ul>
+      {% for role in subscription_plan.roles %}
+        <li class="flex items-center justify-between py-3 border-b border-slate-200">
+          <div class="text-sm text-slate-800 ml-2 truncate">{{ role.display_name }}</div>
+        </li>
+      {% endfor %}
+    </ul>
+  </div>
+{% endif %}
+<div class="mt-6 space-y-4">
+  <a
+    href="{{ url_for('dashboard.subscription_plans:update', id=subscription_plan.id) }}"
+    class="btn w-full border-slate-200 hover:border-slate-300"
+    hx-boost="true"
+    hx-target="#modal"
+    _="install OpenModal"
+  >
+    Edit Subscription Plan
+  </a>
+  <a
+    href="{{ url_for('dashboard.subscription_plans:delete', id=subscription_plan.id) }}"
+    class="btn w-full bg-red-500 hover:bg-red-600 text-white"
+    hx-boost="true"
+    hx-target="#modal"
+    _="install OpenModal"
+  >
+    Delete Subscription Plan
+  </a>
+</div>
+{% endblock %}

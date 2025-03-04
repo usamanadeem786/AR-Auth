@@ -8,16 +8,23 @@ from auth.apps.dashboard.exception_handlers import exception_handlers
 from auth.apps.dashboard.routers.api_keys import router as api_keys_router
 from auth.apps.dashboard.routers.auth import router as auth_router
 from auth.apps.dashboard.routers.clients import router as clients_router
-from auth.apps.dashboard.routers.email_templates import router as email_templates_router
-from auth.apps.dashboard.routers.oauth_providers import router as oauth_providers_router
-from auth.apps.dashboard.routers.permissions import router as permissions_router
+from auth.apps.dashboard.routers.email_templates import \
+    router as email_templates_router
+from auth.apps.dashboard.routers.oauth_providers import \
+    router as oauth_providers_router
+from auth.apps.dashboard.routers.permissions import \
+    router as permissions_router
 from auth.apps.dashboard.routers.roles import router as roles_router
+from auth.apps.dashboard.routers.subscription_plans import \
+    router as subscriptions_plans_router
 from auth.apps.dashboard.routers.tenants import router as tenants_router
 from auth.apps.dashboard.routers.themes import router as themes_router
-from auth.apps.dashboard.routers.user_fields import router as user_fields_router
+from auth.apps.dashboard.routers.user_fields import \
+    router as user_fields_router
 from auth.apps.dashboard.routers.users import router as users_router
 from auth.apps.dashboard.routers.webhooks import router as webhooks_router
-from auth.dependencies.admin_authentication import is_authenticated_admin_session
+from auth.dependencies.admin_authentication import \
+    is_authenticated_admin_session
 from auth.middlewares.csrf import CSRFCookieSetterMiddleware
 from auth.middlewares.security_headers import SecurityHeadersMiddleware
 from auth.paths import STATIC_DIRECTORY
@@ -49,6 +56,7 @@ app.include_router(tenants_router, prefix="/tenants")
 app.include_router(user_fields_router, prefix="/user-fields")
 app.include_router(users_router, prefix="/users")
 app.include_router(webhooks_router, prefix="/webhooks")
+app.include_router(subscriptions_plans_router, prefix="/subscription-plans")
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="dashboard:static")
 
 for exc, handler in exception_handlers.items():

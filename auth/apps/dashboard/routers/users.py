@@ -4,78 +4,49 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 from pydantic import UUID4
 
 from auth import schemas
-from auth.apps.dashboard.dependencies import (
-    BaseContext,
-    DatatableColumn,
-    DatatableQueryParameters,
-    DatatableQueryParametersGetter,
-    get_base_context,
-)
-from auth.apps.dashboard.forms.user import (
-    CreateUserPermissionForm,
-    CreateUserRoleForm,
-    UserAccessTokenForm,
-    UserCreateForm,
-    UserUpdateForm,
-)
+from auth.apps.dashboard.dependencies import (BaseContext, DatatableColumn,
+                                              DatatableQueryParameters,
+                                              DatatableQueryParametersGetter,
+                                              get_base_context)
+from auth.apps.dashboard.forms.user import (CreateUserPermissionForm,
+                                            CreateUserRoleForm,
+                                            UserAccessTokenForm,
+                                            UserCreateForm, UserUpdateForm)
 from auth.apps.dashboard.responses import HXRedirectResponse
 from auth.crypto.access_token import generate_access_token
-from auth.dependencies.admin_authentication import is_authenticated_admin_session
+from auth.dependencies.admin_authentication import \
+    is_authenticated_admin_session
 from auth.dependencies.logger import get_audit_logger
 from auth.dependencies.pagination import PaginatedObjects
-from auth.dependencies.permission import (
-    UserPermissionsGetter,
-    get_user_permissions_getter,
-)
+from auth.dependencies.permission import (UserPermissionsGetter,
+                                          get_user_permissions_getter)
 from auth.dependencies.repositories import get_repository
+from auth.dependencies.subscription_plan import \
+    get_subscription_plan_by_plan_id_or_404
 from auth.dependencies.tenant import get_tenants
-from auth.dependencies.user_field import get_user_create_admin_model, get_user_fields
+from auth.dependencies.user_field import (get_user_create_admin_model,
+                                          get_user_fields)
 from auth.dependencies.user_roles import get_user_roles_service
-from auth.dependencies.users import (
-    get_admin_user_update_model,
-    get_paginated_users,
-    get_user_by_id_or_404,
-    get_user_manager,
-    get_user_oauth_accounts,
-    get_user_permissions,
-    get_user_roles,
-)
+from auth.dependencies.users import (get_admin_user_update_model,
+                                     get_paginated_users,
+                                     get_user_by_id_or_404, get_user_manager,
+                                     get_user_oauth_accounts,
+                                     get_user_permissions, get_user_roles)
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.forms import FormHelper
 from auth.logger import AuditLogger
-from auth.models import (
-    AuditLogMessage,
-    OAuthAccount,
-    Tenant,
-    User,
-    UserField,
-    UserPermission,
-    UserRole,
-)
-from auth.repositories import (
-    ClientRepository,
-    PermissionRepository,
-    RoleRepository,
-    TenantRepository,
-    UserPermissionRepository,
-    UserRepository,
-)
+from auth.models import (AuditLogMessage, OAuthAccount, Tenant, User,
+                         UserField, UserPermission, UserRole)
+from auth.repositories import (ClientRepository, PermissionRepository,
+                               RoleRepository, TenantRepository,
+                               UserPermissionRepository, UserRepository)
 from auth.services.acr import ACR
-from auth.services.user_manager import (
-    InvalidPasswordError,
-    UserAlreadyExistsError,
-    UserManager,
-)
-from auth.services.user_roles import (
-    UserRoleAlreadyExists,
-    UserRoleDoesNotExist,
-    UserRolesService,
-)
-from auth.services.webhooks.models import (
-    UserDeleted,
-    UserPermissionCreated,
-    UserPermissionDeleted,
-)
+from auth.services.user_manager import (InvalidPasswordError,
+                                        UserAlreadyExistsError, UserManager)
+from auth.services.user_roles import (UserRoleAlreadyExists,
+                                      UserRoleDoesNotExist, UserRolesService)
+from auth.services.webhooks.models import (UserDeleted, UserPermissionCreated,
+                                           UserPermissionDeleted)
 from auth.templates import templates
 
 router = APIRouter(dependencies=[Depends(is_authenticated_admin_session)])
@@ -196,9 +167,7 @@ async def create_user(
             user = await user_manager.create(user_create, tenant.id, request=request)
             audit_logger.log_object_write(AuditLogMessage.OBJECT_CREATED, user)
         except UserAlreadyExistsError:
-            form.email.errors.append(
-                "A user with this email address already exists."
-            )
+            form.email.errors.append("A user with this email address already exists.")
             return await form_helper.get_error_response(
                 "A user with this email address already exists.",
                 "user_already_exists",
@@ -258,9 +227,7 @@ async def update_user(
             user = await user_manager.update(user_update, user, request=request)
             audit_logger.log_object_write(AuditLogMessage.OBJECT_UPDATED, user)
         except UserAlreadyExistsError:
-            form.email.errors.append(
-                "A user with this email address already exists."
-            )
+            form.email.errors.append("A user with this email address already exists.")
             return await form_helper.get_error_response(
                 "A user with this email address already exists.",
                 "user_already_exists",
@@ -613,3 +580,170 @@ async def user_oauth_accounts(
             "tab": "oauth",
         },
     )
+
+
+from auth.dependencies.subscription_plan import get_subscription_plans
+from auth.dependencies.users import get_user_by_id_or_404
+from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
+from auth.logger import AuditLogger
+from auth.models.subscription_plan import SubscriptionPlan
+from auth.repositories.user_subscription import UserSubscriptionRepository
+
+
+@router.get("/{id:uuid}/subscriptions", name="dashboard.user_subscriptions:list")
+async def list_user_subscriptions(
+    request: Request,
+    user: User = Depends(get_user_by_id_or_404),
+    subscription_plans: list[SubscriptionPlan] = Depends(get_subscription_plans),
+    user_subscription_repository: UserSubscriptionRepository = Depends(
+        get_repository(UserSubscriptionRepository)
+    ),
+    context: BaseContext = Depends(get_base_context),
+):
+    form_helper = FormHelper(
+        CreateUserRoleForm,
+        "admin/users/get/subscriptions.html",
+        request=request,
+        context={
+            **context,
+            "user": user,
+            "tab": "subscriptions",
+        },
+    )
+    # Get user's active subscriptions
+    user_subscriptions = await user_subscription_repository.get_active_by_user(user.id)
+
+    # Get subscription plan IDs that the user already has
+    user_subscription_plan_ids = {
+        sub.subscription_plan_id for sub in user_subscriptions
+    }
+    form_helper.context["user_subscriptions"] = user_subscriptions
+
+    # Filter available plans (those the user doesn't already have)
+    available_plans = [
+        plan for plan in subscription_plans if plan.id not in user_subscription_plan_ids
+    ]
+    form_helper.context["available_plans"] = available_plans
+
+    return await form_helper.get_response()
+
+
+# @router.get("/", name="dashboard.user_subscriptions:list")
+# async def list_user_subscriptions(
+#     request: Request,
+#     user: User = Depends(get_user_by_id_or_404),
+#     subscription_plans: list[SubscriptionPlan] = Depends(get_subscription_plans),
+#     user_subscription_repository: UserSubscriptionRepository = Depends(
+#         get_repository(UserSubscriptionRepository)
+#     ),
+#     context: BaseContext = Depends(get_base_context),
+# ):
+#     # Get user's active subscriptions
+#     user_subscriptions = await user_subscription_repository.get_active_by_user(user.id)
+
+#     # Get subscription plan IDs that the user already has
+#     user_subscription_plan_ids = {
+#         sub.subscription_plan_id for sub in user_subscriptions
+#     }
+
+#     # Filter available plans (those the user doesn't already have)
+#     available_plans = [
+#         plan for plan in subscription_plans if plan.id not in user_subscription_plan_ids
+#     ]
+
+#     return HTMLResponse(
+#         request.app.state.templates.TemplateResponse(
+#             "admin/users/subscriptions.html",
+#             {
+#                 **context,
+#                 "user": user,
+#                 "user_subscriptions": user_subscriptions,
+#                 "available_plans": available_plans,
+#                 "layout": "admin/layout.html",
+#             },
+#         ).body
+#     )
+
+
+@router.post(
+    "/{id:uuid}/subscriptions/{plan_id:uuid}/add",
+    name="dashboard.user_subscriptions:add",
+)
+async def add_user_subscription(
+    request: Request,
+    user: User = Depends(get_user_by_id_or_404),
+    subscription_plan: SubscriptionPlan = Depends(get_subscription_plan_by_plan_id_or_404),
+    user_subscription_repository: UserSubscriptionRepository = Depends(
+        get_repository(UserSubscriptionRepository)
+    ),
+):
+    # Check if user already has this subscription
+    existing = await user_subscription_repository.get_by_user_and_plan(
+        user_id=user.id,
+        subscription_plan_id=subscription_plan.id,
+    )
+
+    if not existing:
+        # Create user subscription with expiry based on plan
+        await user_subscription_repository.create_with_expiry(
+            user_id=user.id,
+            subscription_plan_id=subscription_plan.id,
+            expiry_days=subscription_plan.expiry_interval,
+        )
+
+    # Redirect back to user subscriptions page
+    return HXRedirectResponse(
+        request.url_for("dashboard.user_subscriptions:list", id=user.id),
+        status_code=status.HTTP_201_CREATED,
+    )
+
+
+# @router.post("/{plan_id:uuid}/remove", name="dashboard.user_subscriptions:remove")
+# async def remove_user_subscription(
+#     request: Request,
+#     user: User = Depends(get_user_by_id_or_404),
+#     subscription_plan: SubscriptionPlan = Depends(get_subscription_plan_by_id_or_404),
+#     user_subscription_repository: UserSubscriptionRepository = Depends(
+#         get_repository(UserSubscriptionRepository)
+#     ),
+#     audit_logger: AuditLogger = Depends(get_audit_logger),
+#     trigger_webhooks: TriggerWebhooks = Depends(get_trigger_webhooks),
+# ):
+#     # Find the user subscription
+#     user_subscription = await user_subscription_repository.get_by_user_and_plan(
+#         user_id=user.id,
+#         subscription_plan_id=subscription_plan.id,
+#     )
+
+#     if user_subscription:
+#         subscription_data = schemas.UserSubscription(
+#             id=user_subscription.id,
+#             user_id=user_subscription.user_id,
+#             subscription_plan_id=user_subscription.subscription_plan_id,
+#             expires_at=user_subscription.expires_at,
+#             created_at=user_subscription.created_at,
+#             updated_at=user_subscription.updated_at,
+#             is_active=user_subscription.is_active,
+#         )
+
+#         # Delete the subscription
+#         await user_subscription_repository.delete(user_subscription)
+
+#         # Audit log
+#         await audit_logger.log_object_deleted(
+#             object_type="user_subscription",
+#             object_id=str(user_subscription.id),
+#             object=subscription_data,
+#         )
+
+#         # Trigger webhooks
+#         await trigger_webhooks(
+#             "user_subscription.deleted",
+#             subscription_data,
+#         )
+
+#     # Redirect back to user subscriptions page
+#     return RedirectResponse(
+#         url=request.url_for("dashboard.user_subscriptions:list", user_id=user.id),
+#         status_code=status.HTTP_303_SEE_OTHER,
+#     )

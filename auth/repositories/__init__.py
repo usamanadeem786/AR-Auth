@@ -19,12 +19,14 @@ from auth.repositories.registration_session import \
     RegistrationSessionRepository
 from auth.repositories.role import RoleRepository
 from auth.repositories.session_token import SessionTokenRepository
+from auth.repositories.subscription_plan import SubscriptionPlanRepository
 from auth.repositories.tenant import TenantRepository
 from auth.repositories.theme import ThemeRepository
 from auth.repositories.user import UserRepository
 from auth.repositories.user_field import UserFieldRepository
 from auth.repositories.user_permission import UserPermissionRepository
 from auth.repositories.user_role import UserRoleRepository
+from auth.repositories.user_subscription import UserSubscriptionRepository
 from auth.repositories.webhook import WebhookRepository
 from auth.repositories.webhook_log import WebhookLogRepository
 
@@ -57,4 +59,6 @@ __all__ = [
     "WebhookLogRepository",
     "get_repository",
     "OrganizationInvitationRepository",
+    "SubscriptionPlanRepository",
+    "UserSubscriptionRepository",
 ]
