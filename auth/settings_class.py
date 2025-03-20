@@ -4,24 +4,16 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from pydantic import (
-    DirectoryPath,
-    EmailStr,
-    Field,
-    SecretStr,
-    field_validator,
-    model_validator,
-)
+from pydantic import (DirectoryPath, EmailStr, Field, SecretStr,
+                      field_validator, model_validator)
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from auth.crypto.encryption import is_valid_key
-from auth.db.types import (
-    DatabaseConnectionParameters,
-    DatabaseType,
-    create_database_connection_parameters,
-)
+from auth.db.types import (DatabaseConnectionParameters, DatabaseType,
+                           create_database_connection_parameters)
 from auth.paths import TEMPLATES_DIRECTORY
-from auth.services.email import EMAIL_PROVIDERS, AvailableEmailProvider, EmailProvider
+from auth.services.email import (EMAIL_PROVIDERS, AvailableEmailProvider,
+                                 EmailProvider)
 
 
 class Environment(StrEnum):
@@ -155,6 +147,10 @@ class Settings(BaseSettings):
     invitation_token_cookie_domain: str = ""
     invitation_token_cookie_secure: bool = True
     invitation_token_cookie_lifetime_seconds: int = 3600 * 24
+
+    # Stripe settings
+    stripe_secret_key: str
+    stripe_webhook_secret: str | None = None
 
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", secrets_dir=initial_settings.secrets_dir

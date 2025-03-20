@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import UUID4
 from sqlalchemy import select
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from auth.models.organization import (Organization, OrganizationInvitation,
                                       OrganizationMember)
@@ -61,11 +61,33 @@ class OrganizationRepository(
         result = await self.session.execute(stmt)
         return result.scalar_one_or_none()
 
+    async def get_by_user_customer_id(
+        self, stripe_customer_id: str
+    ) -> Optional[Organization]:
+        """Get organization by user's Stripe customer ID"""
+        statement = select(self.model).where(
+            self.model.user.has(User.stripe_customer_id == stripe_customer_id),
+        )
+        result = await self.session.execute(statement)
+        return result.scalar_one_or_none()
+
 
 class OrganizationMemberRepository(
     BaseRepository[OrganizationMember], UUIDRepositoryMixin[OrganizationMember]
 ):
     model = OrganizationMember
+
+    async def get_by_user(self, user_id: UUID4) -> list[OrganizationMember]:
+        statement = (
+            select(self.model)
+            .where(self.model.user_id == user_id)
+            .options(
+                joinedload(OrganizationMember.organization).joinedload(
+                    Organization.subscriptions
+                )
+            )
+        )
+        return await self.list(statement)
 
     async def get_by_user_and_org(
         self, user_id: str, organization_id: str
@@ -87,6 +109,16 @@ class OrganizationMemberRepository(
         statement = select(self.model).where(
             self.model.user_id == user_id,
             self.model.organization_id.in_(organization_ids),
+        )
+        result = await self.session.execute(statement)
+        return result.scalars().all()
+
+    async def get_by_organization(
+        self, organization_id: UUID4
+    ) -> list[OrganizationMember]:
+        """Get all members of an organization"""
+        statement = select(self.model).where(
+            self.model.organization_id == organization_id
         )
         result = await self.session.execute(statement)
         return result.scalars().all()

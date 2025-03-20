@@ -41,7 +41,7 @@
           <button
             type="button"
             hx-delete="{{ url_for('dashboard.users:delete_role', id=user.id, role_id=user_role.role_id) }}"
-            hx-targer="#aside"
+            hx-target="#aside"
           >
             {{ icons.trash('w-4 h-4') }}
           </button>

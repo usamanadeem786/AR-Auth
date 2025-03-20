@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Form, HTTPException, Response
+from fastapi.security import OAuth2PasswordRequestForm
+from pydantic import UUID4
 
 from auth.crypto.access_token import generate_access_token
 from auth.crypto.id_token import generate_id_token
@@ -17,7 +19,11 @@ from auth.dependencies.token import (
 )
 from auth.logger import AuditLogger
 from auth.models import AuditLogMessage, RefreshToken, Tenant, User
-from auth.repositories import RefreshTokenRepository
+from auth.repositories import (
+    OrganizationMemberRepository,
+    OrganizationSubscriptionRepository,
+    RefreshTokenRepository,
+)
 from auth.schemas.auth import TokenResponse
 
 router = APIRouter()
@@ -33,6 +39,13 @@ async def token(
         get_repository(RefreshTokenRepository)
     ),
     tenant: Tenant = Depends(get_current_tenant),
+    organization_id: UUID4 | None = Form(None),
+    organization_member_repository: OrganizationMemberRepository = Depends(
+        get_repository(OrganizationMemberRepository)
+    ),
+    organization_subscription_repository: OrganizationSubscriptionRepository = Depends(
+        get_repository(OrganizationSubscriptionRepository)
+    ),
     audit_logger: AuditLogger = Depends(get_audit_logger),
 ):
     scope = grant_request["scope"]
@@ -41,10 +54,60 @@ async def token(
     nonce = grant_request["nonce"]
     c_hash = grant_request["c_hash"]
     client = grant_request["client"]
-    permissions = await get_user_permissions(user)
 
-    for role in tenant.default_roles:
-        permissions.extend([permission.codename for permission in role.permissions])
+    # Handle organization-specific permissions if organization_id is provided
+    if organization_id:
+        # Get organization member for the user and organization
+        org_member = await organization_member_repository.get_by_user_and_org(
+            user.id, organization_id
+        )
+
+        if not org_member:
+            # User is not a member of this organization
+            raise HTTPException(
+                status_code=403,
+                detail="User is not a member of the specified organization",
+            )
+
+        # Get active subscriptions for the organization
+        active_subscriptions = (
+            await organization_subscription_repository.get_active_by_organization(
+                organization_id
+            )
+        )
+
+        # Collect all subscription roles and their permissions
+        subscription_permissions = set()
+        permission_ids = set()
+
+        for subscription in active_subscriptions:
+            for role in subscription.roles:
+                for permission in role.permissions:
+                    subscription_permissions.add(permission.codename)
+                    permission_ids.add(permission.id)
+
+        # Determine permissions based on member role
+        if org_member.is_owner_or_admin:
+            # Owners and admins get all permissions from all subscription roles
+            permissions = list(subscription_permissions)
+        else:
+            # Regular members only get permissions from their assigned roles
+            # but these must be within the subscription roles
+            member_permissions = set()
+
+            # Only include permissions from roles that are part of active subscriptions
+            for permission in org_member.permissions:
+                if permission.id in permission_ids:
+                    member_permissions.add(permission.codename)
+
+            permissions = list(member_permissions)
+    else:
+        # Default behavior - get all user permissions
+        permissions = await get_user_permissions(user)
+
+        # Add tenant default role permissions
+        for role in tenant.default_roles:
+            permissions.extend([permission.codename for permission in role.permissions])
 
     tenant_host = tenant.get_host()
     access_token = generate_access_token(

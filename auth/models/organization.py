@@ -1,6 +1,6 @@
 import secrets
 from enum import StrEnum
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from pydantic import UUID4
 from sqlalchemy import Boolean, Column, Enum, ForeignKey, String, Table, Text
@@ -14,6 +14,9 @@ from auth.models.generics import (GUID, CreatedUpdatedAt, ExpiresAt,
 from auth.models.permission import Permission
 from auth.models.user import User
 from auth.settings import settings
+
+if TYPE_CHECKING:
+    from auth.models.organization_subscription import OrganizationSubscription
 
 
 class OrganizationRole(StrEnum):
@@ -72,6 +75,7 @@ class Organization(UUIDModel, CreatedUpdatedAt, Base):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
     description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
 
+    user: Mapped["User"] = relationship("User")
     # Relationships
     members: Mapped[list["OrganizationMember"]] = relationship(
         "OrganizationMember",
@@ -82,6 +86,71 @@ class Organization(UUIDModel, CreatedUpdatedAt, Base):
     invitations: Mapped[list["OrganizationInvitation"]] = relationship(
         "OrganizationInvitation", back_populates="organization", cascade="all, delete"
     )
+    subscriptions: Mapped[list["OrganizationSubscription"]] = relationship(
+        "OrganizationSubscription",
+        back_populates="organization",
+        cascade="all, delete-orphan",
+    )
+
+    def get_active_primary_subscription(self) -> "OrganizationSubscription | None":
+        """
+        Get the active primary subscription for this organization.
+
+        Returns:
+            The active primary subscription, or None if not found
+        """
+        from auth.models.organization_subscription import SubscriptionType
+
+        for subscription in self.subscriptions:
+            if (
+                subscription.subscription_type == SubscriptionType.PRIMARY
+                and subscription.is_active
+            ):
+                return subscription
+        return None
+
+    def get_member_limit(self) -> int:
+        """
+        Get the maximum number of members allowed for this organization
+        based on its active primary subscription.
+
+        Returns:
+            int: The member limit (defaults to 1 if no active subscription)
+        """
+        primary_subscription = self.get_active_primary_subscription()
+        if primary_subscription:
+            return primary_subscription.member_limit
+        return 1  # Default limit if no active subscription
+
+    def get_current_member_count(self) -> int:
+        """
+        Get the current number of members in this organization.
+
+        Returns:
+            int: The number of members
+        """
+        return self.members.count()
+
+    def can_add_member(self) -> bool:
+        """
+        Check if the organization can add another member
+        based on its subscription limit.
+
+        Returns:
+            bool: True if a member can be added, False otherwise
+        """
+        return self.get_current_member_count() < self.get_member_limit()
+
+    def get_remaining_seats(self) -> int:
+        """
+        Get the number of remaining seats available for new members.
+
+        Returns:
+            int: The number of remaining seats (0 if at or over limit)
+        """
+        limit = self.get_member_limit()
+        current = self.get_current_member_count()
+        return max(0, limit - current)
 
 
 class OrganizationMember(UUIDModel, CreatedUpdatedAt, Base):

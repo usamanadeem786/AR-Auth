@@ -1,22 +1,8 @@
-from auth.schemas import (
-    auth,
-    client,
-    email_template,
-    generics,
-    oauth_account,
-    oauth_provider,
-    permission,
-    role,
-    tenant,
-    user,
-    user_field,
-    user_permission,
-    user_role,
-    webhook,
-    webhook_log,
-    well_known,
-    organization,
-)
+from auth.schemas import (auth, client, email_template, generics,
+                          oauth_account, oauth_provider, organization,
+                          permission, role, tenant, user, user_field,
+                          user_permission, user_role, webhook, webhook_log,
+                          well_known)
 
 __all__ = [
     "auth",

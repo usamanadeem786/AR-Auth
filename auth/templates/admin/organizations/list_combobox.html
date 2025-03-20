@@ -1,0 +1,5 @@
+{% import "macros/forms.html" as forms %}
+
+{% call(organization) forms.form_combobox_select_field_results(organizations, "id", "name", "No organization is matching your query.") %}
+  {{ organization.name }}
+{% endcall %}

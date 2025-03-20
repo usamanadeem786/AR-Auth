@@ -5,12 +5,17 @@ from fastapi.staticfiles import StaticFiles
 from auth import __version__
 from auth.apps.auth.exception_handlers import exception_handlers
 from auth.apps.auth.routers.auth import router as auth_router
+from auth.apps.auth.routers.billing import router as billing_router
+from auth.apps.auth.routers.billing import \
+    router_webhook as billing_router_webhook
 from auth.apps.auth.routers.dashboard import router as dashboard_router
 from auth.apps.auth.routers.invitation import router as invitation_router
 from auth.apps.auth.routers.oauth import router as oauth_router
 from auth.apps.auth.routers.organizations import router as organizations_router
 from auth.apps.auth.routers.register import router as register_router
 from auth.apps.auth.routers.reset import router as reset_router
+from auth.apps.auth.routers.subscription import \
+    router as subscription_router
 from auth.apps.auth.routers.token import router as token_router
 from auth.apps.auth.routers.user import router as user_router
 from auth.apps.auth.routers.well_known import router as well_known_router
@@ -19,6 +24,8 @@ from auth.middlewares.locale import (BabelMiddleware,
                                      get_babel_middleware_kwargs)
 from auth.middlewares.security_headers import SecurityHeadersMiddleware
 from auth.paths import STATIC_DIRECTORY
+from auth.settings import settings
+from auth.settings_class import Environment
 
 
 def include_routers(router: APIRouter) -> APIRouter:
@@ -30,12 +37,19 @@ def include_routers(router: APIRouter) -> APIRouter:
     router.include_router(user_router, prefix="/api")
     router.include_router(well_known_router, prefix="/.well-known")
     router.include_router(organizations_router, prefix="/api")
+    router.include_router(subscription_router, prefix="/api")
+    router.include_router(billing_router, prefix="/api")
     router.include_router(dashboard_router, include_in_schema=False)
 
     return router
 
 
 default_tenant_router = include_routers(APIRouter())
+default_tenant_router.include_router(
+    billing_router_webhook,
+    prefix="/api",
+    include_in_schema=settings.environment != Environment.PRODUCTION,
+)
 tenant_router = include_routers(APIRouter(prefix="/{tenant_slug}"))
 
 

@@ -8,19 +8,46 @@
 
 {% block tab %}
 <div class="mt-6">
-  <h3 class="text-slate-800 font-semibold mb-4">Active Subscriptions</h3>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-slate-800 font-semibold">Active Subscriptions</h3>
+    <a
+      href="{{ url_for('dashboard.users:add_subscription', id=user.id) }}"
+      class="btn-sm bg-primary-500 hover:bg-primary-600 text-white"
+      hx-boost="true"
+      hx-target="#modal"
+      _="install OpenModal"
+    >
+      {{ icons.plus('w-4 h-4') }}
+      <span class="ml-2">Add</span>
+    </a>
+  </div>
 
-  {% if user_subscriptions %}
+  {% if organization_subscriptions %}
     <div class="bg-white shadow-lg rounded-sm border border-slate-200 mb-6">
       <div class="overflow-x-auto">
         <table class="table-auto w-full">
           <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-50 border-t border-b border-slate-200">
             <tr>
               <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                <div class="font-semibold text-left">Plan</div>
+                <div class="font-semibold text-left">Subscription</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Tier</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Mode</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Status</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Details</div>
               </th>
               <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                 <div class="font-semibold text-left">Expires</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Grace Period</div>
               </th>
               <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                 <div class="font-semibold text-right">Actions</div>
@@ -28,31 +55,86 @@
             </tr>
           </thead>
           <tbody class="text-sm divide-y divide-slate-200">
-            {% for subscription in user_subscriptions %}
+            {% for subscription in organization_subscriptions %}
               <tr>
                 <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div class="font-medium text-slate-800">
-                    <a href="{{ url_for('dashboard.subscription_plans:get', id=subscription.subscription_plan.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
-                      {{ subscription.subscription_plan.name }}
+                  <div class="text-left">
+                    <a href="{{ url_for('dashboard.subscriptions:get', id=subscription.tier.subscription.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
+                      {{ subscription.tier.subscription.name }}
                     </a>
                   </div>
                 </td>
                 <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div class="text-left">
-                    {% if subscription.expires_at %}
+                    {% if subscription.tier %}
+                      {{ subscription.tier.name }}
+                    {% else %}
+                      <span class="italic text-slate-500">Unknown Tier</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    <span class="badge {{ 'bg-indigo-500' if subscription.interval else 'bg-emerald-500' }}">
+                      {{ 'recurring' if subscription.interval else 'one-time' }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    <span class="badge {{ 'bg-success' if subscription.status == 'active' else 'bg-slate-500' }}">
+                      {{ subscription.status }}
+                    </span>
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if subscription.quantity > 1 %}
+                      <span class="badge bg-blue-500">Quantity: {{ subscription.quantity }}</span>
+                    {% endif %}
+                    {% if subscription.accounts > 1 %}
+                      <span class="badge bg-purple-500 ml-1">Accounts: {{ subscription.accounts }}</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if not subscription.interval %}
+                      <span class="italic text-slate-500">N/A</span>
+                    {% elif subscription.expires_at %}
                       {{ subscription.expires_at.strftime('%Y-%m-%d %H:%M') }}
+                      {% if subscription.days_until_expiry > 0 %}
+                        <span class="badge bg-amber-500 ml-1">{{ subscription.days_until_expiry }} days</span>
+                      {% endif %}
                     {% else %}
                       <span class="italic text-slate-500">Never</span>
                     {% endif %}
                   </div>
                 </td>
                 <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if not subscription.interval %}
+                      <span class="italic text-slate-500">N/A</span>
+                    {% elif subscription.grace_expires_at %}
+                      {{ subscription.grace_expires_at.strftime('%Y-%m-%d %H:%M') }}
+                      {% if subscription.is_in_grace_period %}
+                        <span class="badge bg-red-500 ml-1">{{ subscription.days_until_grace_period_ends }} days</span>
+                      {% endif %}
+                    {% else %}
+                      <span class="italic text-slate-500">None</span>
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
                   <div class="text-right">
-                    <form method="POST" action="{{ url_for('dashboard.user_subscriptions:remove', id=user.id, plan_id=subscription.subscription_plan.id) }}">
-                      <button type="submit" class="btn-xs bg-red-500 hover:bg-red-600 text-white">
-                        Remove
-                      </button>
-                    </form>
+                    <button 
+                      type="button"
+                      class="btn-xs bg-red-500 hover:bg-red-600 text-white"
+                      hx-delete="{{ url_for('dashboard.users:remove_subscription', id=user.id, subscription_id=subscription.id) }}"
+                      hx-target="#aside"
+                    >
+                      Remove
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -65,60 +147,6 @@
     {% call alerts.info() %}
       <p>This user doesn't have any active subscriptions.</p>
     {% endcall %}
-  {% endif %}
-
-  {% if available_plans %}
-    <h3 class="text-slate-800 font-semibold mb-4 mt-8">Add Subscription</h3>
-    <div class="bg-white shadow-lg rounded-sm border border-slate-200 mb-6">
-      <div class="overflow-x-auto">
-        <table class="table-auto w-full">
-          <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-50 border-t border-b border-slate-200">
-            <tr>
-              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                <div class="font-semibold text-left">Plan</div>
-              </th>
-              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                <div class="font-semibold text-left">Expiry (days)</div>
-              </th>
-              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                <div class="font-semibold text-right">Actions</div>
-              </th>
-            </tr>
-          </thead>
-          <tbody class="text-sm divide-y divide-slate-200">
-            {% for plan in available_plans %}
-              <tr>
-                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div class="font-medium text-slate-800">
-                    <a href="{{ url_for('dashboard.subscription_plans:get', id=plan.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
-                      {{ plan.name }}
-                    </a>
-                  </div>
-                </td>
-                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div class="text-left">
-                    {% if plan.expiry_days %}
-                      {{ plan.expiry_days }}
-                    {% else %}
-                      <span class="italic text-slate-500">Never</span>
-                    {% endif %}
-                  </div>
-                </td>
-                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
-                  <div class="text-right">
-                    <form method="POST" action="{{ url_for('dashboard.user_subscriptions:add', id=user.id, plan_id=plan.id) }}">
-                      <button type="submit" class="btn-xs bg-primary-500 hover:bg-primary-600 text-white">
-                        Add
-                      </button>
-                    </form>
-                  </div>
-                </td>
-              </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-    </div>
   {% endif %}
 </div>
 {% endblock %}

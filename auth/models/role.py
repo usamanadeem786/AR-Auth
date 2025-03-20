@@ -34,6 +34,8 @@ class Role(UUIDModel, CreatedUpdatedAt, Base):
         Boolean, default=False, nullable=False
     )
 
+    is_public: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
     permissions: Mapped[list[Permission]] = relationship(
         "Permission", secondary=RolePermission, lazy="selectin"
     )

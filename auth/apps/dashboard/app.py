@@ -15,8 +15,8 @@ from auth.apps.dashboard.routers.oauth_providers import \
 from auth.apps.dashboard.routers.permissions import \
     router as permissions_router
 from auth.apps.dashboard.routers.roles import router as roles_router
-from auth.apps.dashboard.routers.subscription_plans import \
-    router as subscriptions_plans_router
+from auth.apps.dashboard.routers.subscription import \
+    router as subscriptions_router
 from auth.apps.dashboard.routers.tenants import router as tenants_router
 from auth.apps.dashboard.routers.themes import router as themes_router
 from auth.apps.dashboard.routers.user_fields import \
@@ -56,7 +56,7 @@ app.include_router(tenants_router, prefix="/tenants")
 app.include_router(user_fields_router, prefix="/user-fields")
 app.include_router(users_router, prefix="/users")
 app.include_router(webhooks_router, prefix="/webhooks")
-app.include_router(subscriptions_plans_router, prefix="/subscription-plans")
+app.include_router(subscriptions_router, prefix="/subscriptions")
 app.mount("/static", StaticFiles(directory=STATIC_DIRECTORY), name="dashboard:static")
 
 for exc, handler in exception_handlers.items():

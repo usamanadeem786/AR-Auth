@@ -1,0 +1,79 @@
+{% import "macros/icons.html" as icons %}
+
+{% extends layout %}
+
+{% block head_title_content %}Subscriptions · {{ super() }}{% endblock %}
+
+{% block main %}
+<div class="sm:flex sm:justify-between sm:items-center mb-8">
+
+  <div class="mb-4 sm:mb-0">
+    <h1 class="text-2xl md:text-3xl text-slate-800 font-bold">Subscriptions</h1>
+  </div>
+
+  <div class="grid grid-flow-col sm:auto-cols-max justify-start sm:justify-end gap-2">
+    <a
+      href="{{ url_for('dashboard.subscriptions:create') }}"
+      class="btn bg-primary-500 hover:bg-primary-600 text-white"
+      hx-boost="true"
+      hx-target="#modal"
+      _="install OpenModal"
+    >
+      {{ icons.plus('w-4 h-4') }}
+      <span class="hidden sm:block ml-2">Create Subscription</span>
+    </a>
+  </div>
+
+</div>
+<div class="sm:flex sm:justify-between sm:items-center mb-5">
+  <div class="mb-4 sm:mb-0">
+    {% if tenants | length > 1 %}
+      {% set base_button_classes = 'inline-flex items-center justify-center text-sm font-medium leading-5 rounded-full px-3 py-1 border shadow-sm duration-150 ease-in-out' %}
+      {% set inactive_button_classes = 'border-slate-200 hover:border-slate-300 bg-white text-slate-500' %}
+      {% set active_button_classes = 'border-transparent bg-primary-500 text-white' %}
+      <ul class="flex flex-wrap -m-1 mt-3" hx-boost="true" hx-target="#main">
+        <li class="m-1">
+          <a
+            href="?{{ datatable_query_parameters.set_param('tenant', None) }}"
+            class="{{ base_button_classes }} {{ active_button_classes if not datatable_query_parameters.params.tenant else inactive_button_classes }}"
+          >
+            All tenants
+          </a>
+        </li>
+        {% for tenant in tenants %}
+          <li class="m-1">
+            <a
+              href="?{{ datatable_query_parameters.set_param('tenant', tenant.id) }}"
+              class="{{ base_button_classes }} {{ active_button_classes if datatable_query_parameters.params.tenant == (tenant.id | string) else inactive_button_classes }}">{{ tenant.name }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </div>
+</div>
+{% include "admin/subscriptions/table.html" %}
+{% endblock %}
+{% block javascripts_modules %}
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const modeField = document.querySelector('#mode');
+    const recurringFields = document.querySelector('#recurring-fields');
+    
+    function toggleFields() {
+      if (modeField && modeField.value === 'recurring') {
+        if (recurringFields) recurringFields.style.display = 'block';
+      } else {
+        if (recurringFields) recurringFields.style.display = 'none';
+      }
+    }
+    
+    // Initial toggle
+    toggleFields();
+    
+    // Toggle on change
+    if (modeField) {
+      modeField.addEventListener('change', toggleFields);
+    }
+  });
+</script>
+{% endblock %}

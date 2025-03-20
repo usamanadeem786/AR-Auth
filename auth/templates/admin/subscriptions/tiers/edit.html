@@ -1,0 +1,49 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/forms.html" as forms %}
+{% import "macros/modal.html" as modal %}
+{% import "macros/icons.html" as icons %}
+
+{% extends "admin/subscriptions/list.html" %}
+
+{% block head_title_content %}Edit Tier · {{ subscription.name }} · {{ super() }}{% endblock %}
+
+{% set open_modal = true %}
+
+{% block modal %}
+  <form
+    hx-boost="true"
+    hx-target="#modal"
+    method="POST"
+    action="{{ url_for('dashboard.subscriptions:edit_tier', id=subscription.id, tier_id=tier.id) }}"
+    _="on auth:closeModal go back"
+  >
+  {% call modal.header() %}
+    {% call modal.title() %}Edit Tier for {{ subscription.name }}{% endcall %}
+  {% endcall %}
+  {% call modal.body() %}
+    <div class="space-y-4">
+      {{ forms.form_field(form.name) }}
+      {{ forms.form_field(form.mode) }}
+
+      <div id="recurring-fields" class="space-y-4">
+        {{ forms.form_field(form.type) }}
+        <div class="grid grid-cols-2 gap-4">
+          {{ forms.form_field(form.interval_count) }}
+          {{ forms.form_field(form.interval) }}
+        </div>
+      </div>
+      
+      {{ forms.form_field(form.quantity) }}  
+      {{ forms.form_field(form.is_public) }}
+      {{ forms.form_field(form.stripe_price_id) }}
+      {{ forms.form_csrf_token(form) }}
+    </div>
+  {% endcall %}
+  {% call modal.footer() %}
+    <button type="button" class="btn-sm border-slate-200 hover:border-slate-300 text-slate-600" _="install CloseModalButton()">Cancel</button>
+    {% call buttons.submit('btn-sm') %}
+      Update Tier
+    {% endcall %}
+  {% endcall %}
+  </form>
+{% endblock %} 

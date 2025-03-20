@@ -1,0 +1,127 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/alerts.html" as alerts %}
+
+{% extends "admin/subscriptions/get/base.html" %}
+
+{% block tab %}
+<div class="mt-6">
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-lg font-semibold text-slate-800">Subscription Tiers</h3>
+    <a
+      href="{{ url_for('dashboard.subscriptions:create_tier', id=subscription.id) }}"
+      class="btn-sm bg-primary-500 hover:bg-primary-600 text-white"
+      hx-boost="true"
+      hx-target="#modal"
+      _="install OpenModal"
+    >
+      {{ icons.plus('w-4 h-4') }}
+      <span class="ml-2">Add Tier</span>
+    </a>
+  </div>
+
+  {% if tiers %}
+    <div class="bg-white shadow-lg rounded-sm border border-slate-200">
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full">
+          <thead class="text-xs font-semibold uppercase text-slate-500 bg-slate-50 border-t border-b border-slate-200">
+            <tr>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Name</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Mode</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Quantity</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Type</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Interval</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Public</div>
+              </th>
+              <th class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                <div class="font-semibold text-left">Actions</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody class="text-sm divide-y divide-slate-200">
+            {% for tier in tiers %}
+              <tr>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="font-medium text-slate-800">
+                    {{ tier.name }}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {{ tier.mode.value }}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {{ tier.quantity }}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {{ tier.type.value if tier.type else '-' }}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if tier.interval %}
+                      {{ tier.interval_count if tier.interval_count else 1 }} {{ tier.interval.value }}
+                    {% else %}
+                      -
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="text-left">
+                    {% if tier.is_public %}
+                      {{ icons.check('w-4 h-4') }}
+                    {% else %}
+                      {{ icons.x_mark('w-4 h-4') }}
+                    {% endif %}
+                  </div>
+                </td>
+                <td class="px-2 first:pl-5 last:pr-5 py-3 whitespace-nowrap">
+                  <div class="flex space-x-2">
+                    <a
+                      href="{{ url_for('dashboard.subscriptions:edit_tier', id=subscription.id, tier_id=tier.id) }}"
+                      class="text-slate-400 hover:text-slate-500"
+                      hx-boost="true"
+                      hx-target="#modal"
+                      _="install OpenModal"
+                    >
+                      {{ icons.pencil('w-4 h-4') }}
+                    </a>
+                    <a
+                      href="{{ url_for('dashboard.subscriptions:delete_tier', id=subscription.id, tier_id=tier.id) }}"
+                      class="text-red-500 hover:text-red-600"
+                      hx-boost="true"
+                      hx-target="#modal"
+                      _="install OpenModal"
+                    >
+                      {{ icons.trash('w-4 h-4') }}
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    {% call alerts.info() %}
+      <p>This subscription doesn't have any tiers yet. Add a tier to make this subscription available for purchase.</p>
+    {% endcall %}
+  {% endif %}
+</div>
+{% endblock %}

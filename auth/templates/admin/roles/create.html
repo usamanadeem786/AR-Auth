@@ -24,6 +24,7 @@
     <div class="space-y-4">
       {{ forms.form_field(form.name) }}
       {{ forms.form_field(form.granted_by_default) }}
+      {{ forms.form_field(form.is_public) }}
       {{ forms.form_field(form.permissions) }}
       {{ forms.form_csrf_token(form) }}
     </div>

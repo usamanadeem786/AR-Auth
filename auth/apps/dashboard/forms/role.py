@@ -9,6 +9,11 @@ class BaseRoleForm(CSRFBaseForm):
         "Granted by default",
         description="When enabled, the role will automatically be assigned to users when they register.",
     )
+    is_public = BooleanField(
+        "Public",
+        default=True,
+        description="Whether this role is publicly available.",
+    )
     permissions = ComboboxSelectMultipleField(
         "Permissions",
         query_endpoint_path="/admin/access-control/permissions/",

@@ -1,0 +1,23 @@
+{% import "macros/alerts.html" as alerts %}
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/modal.html" as modal %}
+{% import "macros/icons.html" as icons %}
+
+{% extends "admin/subscriptions/list.html" %}
+
+{% block head_title_content %}{{ subscription.name }} · {{ super() }}{% endblock %}
+
+{% set open_modal = true %}
+
+{% block modal %}
+{% call modal.delete_modal_core(
+    "Delete the Subscription \"" ~ subscription.name ~ "\"?",
+    url_for("dashboard.subscriptions:delete", id=subscription.id),
+  )
+%}
+  <p class="text-justify">If you delete this subscription, all organization subscriptions associated with it will be deleted on the next renewal when their subscription expires.</p>
+  <ul class="text-red-500 list-disc list-inside	mt-4">
+    <li>{{ active_subscriptions_count }} organization subscriptions will be <strong>deleted</strong>.</li>
+  </ul>
+{% endcall %}
+{% endblock %}

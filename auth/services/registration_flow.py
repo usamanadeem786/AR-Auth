@@ -3,15 +3,10 @@ from typing import Any, TypeVar
 
 from fastapi import Request, Response
 
-from auth.models import (
-    OAuthAccount,
-    RegistrationSession,
-    RegistrationSessionFlow,
-    Tenant,
-    User,
-    UserField,
-)
-from auth.repositories import OAuthAccountRepository, RegistrationSessionRepository
+from auth.models import (OAuthAccount, RegistrationSession,
+                         RegistrationSessionFlow, Tenant, User, UserField)
+from auth.repositories import (OAuthAccountRepository,
+                               RegistrationSessionRepository)
 from auth.schemas.user import UF, UserCreate
 from auth.services.user_manager import UserManager
 from auth.settings import settings

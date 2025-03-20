@@ -20,6 +20,13 @@
 {% endif %}
 {% endmacro %}
 
+{% macro is_public_column(role) %}
+{% if role.is_public %}
+  {{ icons.check('w-4 h-4') }}
+{% else %}
+  {{ icons.x_mark('w-4 h-4') }}
+{% endif %}
+{% endmacro %}
 {{
   datatable.datatable(
     roles,

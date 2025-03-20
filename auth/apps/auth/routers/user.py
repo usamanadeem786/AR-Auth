@@ -1,12 +1,16 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.responses import JSONResponse
 
+from auth.dependencies.repositories import get_repository
 from auth.dependencies.users import (current_active_user,
                                      current_active_user_acr_level_1,
                                      current_user, get_user_manager,
                                      get_user_update)
 from auth.errors import APIErrorCode
-from auth.models import User
+from auth.models import OrganizationRole, User
+from auth.models.organization_subscription import SubscriptionStatus
+from auth.repositories import OrganizationMemberRepository
+from auth.schemas.organization import OrganizationSubscriptionCalculated
 from auth.schemas.user import (UF, UserChangeEmail, UserChangePassword,
                                UserUpdate, UserVerifyEmail)
 from auth.services.user_manager import (InvalidEmailVerificationCodeError,
@@ -17,13 +21,52 @@ router = APIRouter()
 
 
 @router.api_route("/userinfo", methods=["GET", "POST"], name="user:userinfo")
-async def userinfo(user: User = Depends(current_active_user)):
+async def userinfo(
+    user: User = Depends(current_active_user),
+    organization_member_repository: OrganizationMemberRepository = Depends(
+        get_repository(OrganizationMemberRepository)
+    ),
+):
     """
     OpenID specification requires the /userinfo endpoint
     to be available both with GET and POST methods 🤷‍♂️
     https://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest
     """
-    return user.get_claims()
+    # Get basic user claims
+    user_claims = user.get_claims()
+
+    # Get all organization memberships for the user
+    organization_memberships = await organization_member_repository.get_by_user(user.id)
+
+    # Categorize organizations
+    owned_organizations = []
+    member_organizations = []
+
+    for membership in organization_memberships:
+        org_info = {
+            "id": str(membership.organization_id),
+            "name": membership.organization.name,
+            "role": membership.role.value,
+        }
+
+        org_info["subscription"] = [
+            OrganizationSubscriptionCalculated.model_validate(subscription)
+            for subscription in membership.organization.subscriptions
+            if subscription.status == SubscriptionStatus.ACTIVE
+        ]
+
+        if membership.role == OrganizationRole.OWNER:
+            owned_organizations.append(org_info)
+        else:
+            member_organizations.append(org_info)
+
+    # Add organization information to the user claims
+    user_claims["organizations"] = {
+        "owned": owned_organizations,
+        "memberships": member_organizations,
+    }
+
+    return user_claims
 
 
 @router.patch(

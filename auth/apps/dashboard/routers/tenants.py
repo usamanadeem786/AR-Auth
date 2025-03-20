@@ -26,6 +26,7 @@ from auth.models import AuditLogMessage, Client, OAuthProvider, Role, Tenant
 from auth.repositories import (ClientRepository, OAuthProviderRepository,
                                RoleRepository, TenantRepository,
                                ThemeRepository, UserRepository)
+from auth.repositories.subscription import SubscriptionRepository
 from auth.services.email import EmailProvider
 from auth.services.tenant_email_domain import (
     DomainAuthenticationNotImplementedError, TenantEmailDomain,
@@ -420,5 +421,31 @@ async def delete_tenant(
             "tenant": tenant,
             "users_count": users_count,
             "clients_count": clients_count,
+        },
+    )
+
+
+@router.get("/{id:uuid}/subscriptions", name="dashboard.tenants:subscriptions")
+async def list_tenant_subscriptions(
+    request: Request,
+    tenant: Tenant = Depends(get_tenant_by_id_or_404),
+    subscription_repository: SubscriptionRepository = Depends(
+        get_repository(SubscriptionRepository)
+    ),
+    list_context=Depends(get_list_context),
+    context: BaseContext = Depends(get_base_context),
+):
+    # Get all subscription plans for this tenant
+    tenant_subscriptions = await subscription_repository.get_by_tenant(tenant.id)
+
+    return templates.TemplateResponse(
+        request,
+        "admin/tenants/get/subscriptions.html",
+        {
+            **context,
+            **list_context,
+            "tenant": tenant,
+            "subscriptions": tenant_subscriptions,
+            "tab": "subscriptions",
         },
     )

@@ -1,0 +1,5 @@
+{% import "macros/forms.html" as forms %}
+
+{% call(tier) forms.form_combobox_select_field_results(tiers, "id", "name", "No subscription tier is matching your query.") %}
+  {{ tier.name }} ({{ tier.subscription.name if tier.subscription else 'Unknown Subscription' }})
+{% endcall %} 

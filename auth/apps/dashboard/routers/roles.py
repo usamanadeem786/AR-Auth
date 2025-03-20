@@ -37,13 +37,19 @@ async def get_columns() -> list[DatatableColumn]:
             "granted_by_default_column",
             ordering="granted_by_default",
         ),
+        DatatableColumn(
+            "Public",
+            "is_public",
+            "is_public_column",
+            ordering="is_public",
+        ),
     ]
 
 
 async def get_list_context(
     columns: list[DatatableColumn] = Depends(get_columns),
     datatable_query_parameters: DatatableQueryParameters = Depends(
-        DatatableQueryParametersGetter(["name", "granted_by_default"])
+        DatatableQueryParametersGetter(["name", "granted_by_default", "is_public"])
     ),
     paginated_roles: PaginatedObjects[Role] = Depends(get_paginated_roles),
 ):

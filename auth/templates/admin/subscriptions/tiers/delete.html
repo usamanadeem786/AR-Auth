@@ -1,0 +1,25 @@
+{% import "macros/alerts.html" as alerts %}
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/modal.html" as modal %}
+{% import "macros/icons.html" as icons %}
+
+{% extends "admin/subscriptions/list.html" %}
+
+{% block head_title_content %}Delete Tier · {{ subscription.name }} · {{ super() }}{% endblock %}
+
+{% set open_modal = true %}
+
+{% block modal %}
+{% call modal.delete_modal_core(
+    "Delete the tier \"" ~ tier.name ~ "\" from " ~ subscription.name ~ "?",
+    url_for("dashboard.subscriptions:delete_tier", id=subscription.id, tier_id=tier.id),
+  )
+%}
+  <p class="text-justify">If you delete this tier, organizations will no longer be able to subscribe to this subscription with this tier option.</p>
+  {% if active_subscriptions_count > 0 %}
+  <ul class="text-red-500 list-disc list-inside mt-4">
+    <li>{{ active_subscriptions_count }} active organization subscriptions are using this tier and will be <strong>affected</strong>.</li>
+  </ul>
+  {% endif %}
+{% endcall %}
+{% endblock %} 

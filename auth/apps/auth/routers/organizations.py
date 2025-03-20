@@ -13,8 +13,10 @@ from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.users import current_active_user
 from auth.errors import APIErrorCode
 from auth.models import (Organization, OrganizationInvitation,
-                         OrganizationMember, Tenant)
+                         OrganizationMember, Tenant, User)
 from auth.repositories import ClientRepository
+from auth.repositories.organization_subscription import \
+    OrganizationSubscriptionRepository
 from auth.schemas.generics import PaginatedResults
 from auth.services.organization import (
     ORGANIZATION_DELETE_CODENAME, ORGANIZATION_INVITE_CODENAME,
@@ -31,7 +33,7 @@ from auth.services.organization_manager import (
     OrganizationMemberPermissionAlreadyExistsError,
     OrganizationMemberPermissionNotFoundError)
 
-router = APIRouter(prefix="/organizations")
+router = APIRouter(prefix="/organizations", tags=["organizations"])
 
 
 # Organization endpoints
@@ -358,47 +360,32 @@ async def resend_organization_invitation(
     return {"message": "Invitation resent successfully"}
 
 
-# @router.post(
-#     "/invitations/{token}/accept",
-#     name="organization:accept_invitation",
-# )
-# async def accept_organization_invitation(
-#     token: str,
-#     current_user: User = Depends(current_active_user),
-#     organization_manager: OrganizationManager = Depends(get_organization_manager),
-#     tenant: Tenant = Depends(get_current_tenant),
-# ):
-#     """Accept invitation - available to any authenticated user"""
-#     try:
-#         await organization_manager.accept_invitation(
-#             token,
-#             current_user.id,
-#             tenant,
-#             request=None
-#         )
-#     except OrganizationMemberAlreadyExistsError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=APIErrorCode.ORGANIZATION_MEMBER_ALREADY_EXISTS,
-#         )
-#     except InvitationExpiredError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=APIErrorCode.ORGANIZATION_INVITATION_EXPIRED,
-#         )
-#     except InvitationAlreadyAcceptedError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=APIErrorCode.ORGANIZATION_INVITATION_ALREADY_ACCEPTED,
-#         )
-#     except InvitationEmailMismatchError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=APIErrorCode.ORGANIZATION_INVITATION_EMAIL_MISMATCH,
-#         )
-#     except InvalidInvitationError:
-#         raise HTTPException(
-#             status_code=status.HTTP_400_BAD_REQUEST,
-#             detail=APIErrorCode.ORGANIZATION_INVITATION_INVALID,
-#         )
-#     return {"message": "Invitation accepted successfully"}
+# Subscription endpoints
+@router.get(
+    "/{id:uuid}/subscriptions",
+    response_model=list[schemas.organization.OrganizationSubscriptionRead],
+)
+async def list_organization_subscriptions(
+    organization: Organization = Depends(get_organization_by_id_or_404),
+    user: User = Depends(current_active_user),
+    organization_subscription_repository: OrganizationSubscriptionRepository = Depends(
+        get_repository(OrganizationSubscriptionRepository)
+    ),
+):
+    """List organization subscriptions - accessible by any member"""
+    if organization.user_id != user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only the organization owner can access the subscription details",
+        )
+
+    subscriptions = (
+        await organization_subscription_repository.get_by_organization_and_user(
+            organization.id, user.id
+        )
+    )
+
+    return [
+        schemas.organization.OrganizationSubscriptionRead.model_validate(subscription)
+        for subscription in subscriptions
+    ]

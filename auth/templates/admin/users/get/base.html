@@ -29,7 +29,7 @@
     {{ tab_header("Roles", route="dashboard.users:roles", active=tab == "roles") }}
     {{ tab_header("Permissions", route="dashboard.users:permissions", active=tab == "permissions") }}
     {{ tab_header("OAuth", route="dashboard.users:oauth_accounts", active=tab == "oauth") }}
-    {{ tab_header("Subscriptions", route="dashboard.user_subscriptions:list", active=tab == "subscriptions") }}
+    {{ tab_header("Subscriptions", route="dashboard.users:list_subscriptions", active=tab == "subscriptions") }}
   </ul>
 </div>
 {% block tab %}{% endblock %}

@@ -50,7 +50,7 @@
             <button
               type="button"
               hx-delete="{{ url_for('dashboard.users:delete_permission', id=user.id, permission_id=user_permission.permission_id) }}"
-              hx-targer="#aside"
+              hx-target="#aside"
             >
               {{ icons.trash('w-4 h-4') }}
             </button>

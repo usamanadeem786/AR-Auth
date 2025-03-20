@@ -5,7 +5,8 @@ from auth.dependencies.tenant import get_current_tenant
 from auth.dependencies.user_field import get_user_create_model, get_user_fields
 from auth.dependencies.users import get_user_manager
 from auth.models import RegistrationSession, Tenant, UserField
-from auth.repositories import OAuthAccountRepository, RegistrationSessionRepository
+from auth.repositories import (OAuthAccountRepository,
+                               RegistrationSessionRepository)
 from auth.schemas.user import UF, UserCreate
 from auth.services.registration_flow import RegistrationFlow
 from auth.services.user_manager import UserManager

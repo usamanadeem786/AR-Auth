@@ -3,9 +3,9 @@
 {% import "macros/modal.html" as modal %}
 {% import "macros/icons.html" as icons %}
 
-{% extends "admin/subscription_plans/list.html" %}
+{% extends "admin/subscriptions/list.html" %}
 
-{% block head_title_content %}{{ subscription_plan.name }} · {{ super() }}{% endblock %}
+{% block head_title_content %}{{ subscription.name }} · {{ super() }}{% endblock %}
 
 {% set open_modal = true %}
 
@@ -14,19 +14,18 @@
     hx-boost="true"
     hx-target="#modal"
     method="POST"
-    action="{{ url_for('dashboard.subscription_plans:update', id=subscription_plan.id) }}"
+    action="{{ url_for('dashboard.subscriptions:update', id=subscription.id) }}"
     _="on auth:closeModal go back"
   >
   {% call modal.header() %}
-    {% call modal.title() %}Edit Subscription Plan {{ subscription_plan.name }}{% endcall %}
+    {% call modal.title() %}Edit Subscription {{ subscription.name }}{% endcall %}
   {% endcall %}
   {% call modal.body() %}
     <div class="space-y-4">
       {{ forms.form_field(form.name) }}
-      {{ forms.form_field(form.details) }}
-      {{ forms.form_field(form.granted_by_default) }}
-      {{ forms.form_field(form.expiry_interval) }}
-      {{ forms.form_field(form.expiry_unit) }}
+      {{ forms.form_field(form.accounts) }}
+      {{ forms.form_field(form.is_public) }}
+      {{ forms.form_field(form.stripe_product_id) }}
       {{ forms.form_field(form.roles) }}
       {{ forms.form_csrf_token(form) }}
     </div>

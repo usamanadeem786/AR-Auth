@@ -26,6 +26,7 @@
   <div class="flex gap-4">
     {{ forms.form_field(form.name, class="grow") }}
     {{ forms.form_field(form.codename, class="grow") }}
+    {{ forms.form_field(form.is_public) }}
     <div class="flex items-end">
       {% call buttons.submit('btn') %}
       {{ icons.plus('w-4 h-4')}}

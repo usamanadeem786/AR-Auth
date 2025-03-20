@@ -8,6 +8,14 @@
 {{ permission.codename }}
 {% endmacro %}
 
+{% macro is_public_column(permission) %}
+{% if permission.is_public %}
+  {{ icons.check('w-4 h-4') }}
+{% else %}
+  {{ icons.x_mark('w-4 h-4') }}
+{% endif %}
+{% endmacro %}
+
 {% macro actions_column(permission) %}
 <div class="flex justify-end">
   <a

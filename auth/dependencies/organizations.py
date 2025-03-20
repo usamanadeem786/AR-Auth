@@ -20,7 +20,7 @@ from auth.dependencies.users import current_active_user
 from auth.dependencies.webhooks import TriggerWebhooks, get_trigger_webhooks
 from auth.logger import AuditLogger
 from auth.models import (Organization, OrganizationInvitation,
-                         OrganizationMember)
+                         OrganizationMember, User)
 from auth.repositories.organization import (OrganizationInvitationRepository,
                                             OrganizationMemberRepository,
                                             OrganizationRepository)
@@ -226,7 +226,7 @@ def require_organization_permission(
 ):
     async def _require_organization_permission(
         organization: Organization = Depends(get_organization_by_id_or_404),
-        current_user=Depends(current_active_user),
+        current_user: User = Depends(current_active_user),
         organization_manager: OrganizationManager = Depends(get_organization_manager),
     ):
         has_permission = await check_organization_permission(

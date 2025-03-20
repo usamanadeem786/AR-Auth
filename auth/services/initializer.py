@@ -226,12 +226,17 @@ class Initializer:
         if permission is None:
             permission = await permission_repository.create(
                 Permission(
-                    name=ADMIN_PERMISSION_NAME, codename=ADMIN_PERMISSION_CODENAME
+                    name=ADMIN_PERMISSION_NAME,
+                    codename=ADMIN_PERMISSION_CODENAME,
+                    is_public=False,
                 )
             )
             await role_repository.create(
                 Role(
-                    name=ADMIN_ROLE_NAME, permissions=[permission], user_permissions=[]
+                    name=ADMIN_ROLE_NAME,
+                    permissions=[permission],
+                    user_permissions=[],
+                    is_public=False,
                 )
             )
 

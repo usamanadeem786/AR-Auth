@@ -35,6 +35,7 @@ async def get_columns() -> list[DatatableColumn]:
     return [
         DatatableColumn("Name", "name", "name_column", ordering="name"),
         DatatableColumn("Codename", "codename", "codename_column", ordering="codename"),
+        DatatableColumn("Public", "is_public", "is_public_column", ordering="is_public"),
         DatatableColumn("Actions", "actions", "actions_column"),
     ]
 
@@ -42,7 +43,7 @@ async def get_columns() -> list[DatatableColumn]:
 async def get_list_context(
     columns: list[DatatableColumn] = Depends(get_columns),
     datatable_query_parameters: DatatableQueryParameters = Depends(
-        DatatableQueryParametersGetter(["name", "codename", "actions"])
+        DatatableQueryParametersGetter(["name", "codename", "is_public", "actions"])
     ),
     paginated_permissions: PaginatedObjects[Permission] = Depends(
         get_paginated_permissions

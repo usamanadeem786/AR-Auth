@@ -27,6 +27,7 @@
   <ul class="relative text-sm font-medium flex flex-nowrap -mx-4 sm:-mx-6 lg:-mx-8 overflow-x-scroll no-scrollbar">
     {{ tab_header("General", route="dashboard.tenants:get", active=tab == "general") }}
     {{ tab_header("Email", route="dashboard.tenants:email", active=tab == "email") }}
+    {{ tab_header("Subscriptions", route="dashboard.tenants:subscriptions", active=tab == "subscriptions") }}
   </ul>
 </div>
 {% block tab %}{% endblock %}

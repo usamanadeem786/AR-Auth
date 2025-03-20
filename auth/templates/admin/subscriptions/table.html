@@ -1,0 +1,53 @@
+{% import "macros/buttons.html" as buttons %}
+{% import "macros/icons.html" as icons %}
+{% import "macros/datatable.html" as datatable %}
+
+{% macro name_column(subscription) %}
+<a
+  class="font-medium text-slate-800 hover:text-slate-900"
+  href="{{ url_for('dashboard.subscriptions:get', id=subscription.id) }}"
+  hx-boost="true"
+  hx-target="#aside"
+  _="install OpenAside"
+>
+  {{ subscription.name }}
+</a>
+{% endmacro %}
+
+{% macro is_public_column(subscription) %}
+{% if subscription.is_public %}
+  {{ icons.check('w-4 h-4') }}
+{% else %}
+  {{ icons.x_mark('w-4 h-4') }}
+{% endif %}
+{% endmacro %}
+
+{% macro accounts_column(subscription) %}
+<div class="text-left">
+  {{ subscription.accounts }}
+</div>
+{% endmacro %}
+
+{% macro tenant_column(subscription) %}
+<div class="text-left">
+  <a href="{{ url_for('dashboard.tenants:get', id=subscription.tenant.id) }}" hx-boost="true" hx-target="#aside" _="install OpenAside">
+    {{ subscription.tenant.name }}
+  </a>
+</div>
+{% endmacro %}
+
+{% macro tiers_column(subscription) %}
+<div class="text-left">
+  {{ subscription.tiers | length }}
+</div>
+{% endmacro %}
+
+{{
+  datatable.datatable(
+    subscriptions,
+    count,
+    datatable_query_parameters,
+    "Subscriptions",
+    columns | map("get_column_macro") | list,
+  )
+}}

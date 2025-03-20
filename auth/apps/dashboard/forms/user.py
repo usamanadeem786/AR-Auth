@@ -1,22 +1,12 @@
-from wtforms import (
-    BooleanField,
-    EmailField,
-    FieldList,
-    Form,
-    FormField,
-    PasswordField,
-    StringField,
-    validators,
-    widgets,
-)
+from wtforms import (BooleanField, EmailField, FieldList, Form, FormField,
+                     IntegerField, PasswordField, SelectField, StringField,
+                     validators, widgets)
 
-from auth.forms import (
-    ComboboxSelectField,
-    CSRFBaseForm,
-    empty_string_to_none,
-    get_form_field,
-)
+from auth.forms import (ComboboxSelectField, CSRFBaseForm,
+                        empty_string_to_none, get_form_field)
 from auth.models import UserField
+from auth.models.organization_subscription import SubscriptionStatus
+from auth.models.subscription import SubscriptionTierType
 
 
 class BaseUserForm(CSRFBaseForm):
@@ -92,4 +82,28 @@ class CreateUserRoleForm(CSRFBaseForm):
         "Add new role",
         query_endpoint_path="/admin/access-control/roles/",
         validators=[validators.InputRequired(), validators.UUID()],
+    )
+
+
+class OrganizationSubscriptionForm(CSRFBaseForm):
+    organization = ComboboxSelectField(
+        "Organization",
+        query_endpoint_path="/admin/users/organizations/",
+        validators=[validators.InputRequired(), validators.UUID()],
+    )
+    tier = ComboboxSelectField(
+        "Subscription Tier",
+        query_endpoint_path="/admin/subscriptions/tiers/",
+        validators=[validators.InputRequired(), validators.UUID()],
+    )
+    status = SelectField(
+        "Status",
+        choices=SubscriptionStatus.choices(),
+        coerce=SubscriptionStatus.coerce,
+        default=SubscriptionStatus.PENDING.value,
+        validators=[validators.InputRequired()],
+    )
+    stripe_subscription_id = StringField(
+        "Stripe subscription ID",
+        validators=[validators.InputRequired()],
     )
