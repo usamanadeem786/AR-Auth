@@ -50,6 +50,22 @@ class EmailTemplateInitializer:
                 content=self._load_template("organization_invitation.html"),
             )
             await self.repository.create(organization_invitation)
+            
+        if await self.repository.get_by_type(EmailTemplateType.SUBSCRIPTION_GRACE_PERIOD) is None:
+            subscription_grace_period = EmailTemplate(
+                type=EmailTemplateType.SUBSCRIPTION_GRACE_PERIOD,
+                subject="Action Required: {{ organization_name }} subscription payment due",
+                content=self._load_template("subscription_grace_period.html"),
+            )
+            await self.repository.create(subscription_grace_period)
+            
+        if await self.repository.get_by_type(EmailTemplateType.SUBSCRIPTION_EXPIRED) is None:
+            subscription_expired = EmailTemplate(
+                type=EmailTemplateType.SUBSCRIPTION_EXPIRED,
+                subject="{{ organization_name }} subscription has been suspended",
+                content=self._load_template("subscription_expired.html"),
+            )
+            await self.repository.create(subscription_expired)
 
     def _load_template(self, name: str) -> str:
         with open(self.templates_dir / name) as file:

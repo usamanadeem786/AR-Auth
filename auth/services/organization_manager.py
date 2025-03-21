@@ -273,16 +273,17 @@ class OrganizationManager:
     async def create_invitation(
         self,
         request: Request,
+        accounts: int,
         organization: Organization,
         invitation_create: schemas.organization.OrganizationInvitationCreate,
         tenant: Tenant,
         client: Client,
     ) -> OrganizationInvitation:
         """Create and send organization invitation"""
-        count_invitations = await self.invitation_repository.count_by_organization(
+        total_invitations = await self.invitation_repository.count_by_organization(
             organization.id
         )
-        if count_invitations >= settings.organization_max_invitations:
+        if total_invitations >= accounts:
             raise InvitationMaxLimitReachedError()
 
         invitation_exists = await self.invitation_repository.get_by_email_and_org(

@@ -1,13 +1,14 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from pydantic import UUID4
-from sqlalchemy import select
+from sqlalchemy import and_, func, select
 from sqlalchemy.orm import joinedload
 
 from auth.models.organization import Organization
 from auth.models.organization_subscription import (OrganizationSubscription,
                                                    SubscriptionStatus)
-from auth.models.subscription import SubscriptionTier
+from auth.models.subscription import (Subscription, SubscriptionTier,
+                                      SubscriptionTierMode)
 from auth.repositories.base import BaseRepository, UUIDRepositoryMixin
 
 
@@ -101,3 +102,45 @@ class OrganizationSubscriptionRepository(
             )
         )
         return await self.list(statement)
+
+    async def get_organization_accounts(self, organization_id: UUID4) -> int:
+        statement = select(func.sum(self.model.accounts).label("total_accounts")).where(
+            OrganizationSubscription.organization_id == organization_id,
+        )
+        result = await self.session.execute(statement)
+        total = result.scalar()
+        return total or 0
+
+    async def get_expired_in_grace_period(
+        self, now: datetime
+    ) -> list[OrganizationSubscription]:
+        """Get subscriptions that have expired but are still in grace period"""
+        statement = (
+            select(self.model)
+            .where(
+                and_(
+                    OrganizationSubscription.expires_at < now,
+                    OrganizationSubscription.status == SubscriptionStatus.ACTIVE,
+                    OrganizationSubscription.tier.has(
+                        mode=SubscriptionTierMode.RECURRING
+                    ),
+                )
+            )
+            .options(
+                joinedload(OrganizationSubscription.organization).joinedload(
+                    Organization.user
+                ),
+                joinedload(OrganizationSubscription.tier)
+                .joinedload(SubscriptionTier.subscription)
+                .joinedload(Subscription.tenant),
+            )
+        )
+        return await self.list(statement)
+
+    async def get_expired_grace_ended(
+        self, now: datetime
+    ) -> list[OrganizationSubscription]:
+        """Get subscriptions that have expired and grace period has ended"""
+        # Using the same query as get_expired_in_grace_period, but filtering will be done
+        # in the caller based on grace_expires_at
+        return await self.get_expired_in_grace_period(now)

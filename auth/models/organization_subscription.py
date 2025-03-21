@@ -68,7 +68,7 @@ class OrganizationSubscription(UUIDModel, CreatedUpdatedAt, Base):
     organization_id: Mapped[UUID4] = mapped_column(
         GUID, ForeignKey(Organization.id, ondelete="CASCADE"), nullable=False
     )
-    accounts: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    accounts: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
     stripe_subscription_id: Mapped[str] = mapped_column(
         String(length=255), nullable=False
     )

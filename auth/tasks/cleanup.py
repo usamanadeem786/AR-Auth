@@ -1,15 +1,9 @@
 import dramatiq
 
-from auth.repositories import (
-    AuthorizationCodeRepository,
-    EmailVerificationRepository,
-    LoginSessionRepository,
-    OAuthSessionRepository,
-    RefreshTokenRepository,
-    RegistrationSessionRepository,
-    SessionTokenRepository,
-    # OrganizationInvitationRepository,
-)
+from auth.repositories import (  # OrganizationInvitationRepository,
+    AuthorizationCodeRepository, EmailVerificationRepository,
+    LoginSessionRepository, OAuthSessionRepository, RefreshTokenRepository,
+    RegistrationSessionRepository, SessionTokenRepository)
 from auth.repositories.base import ExpiresAtRepositoryProtocol
 from auth.tasks.base import TaskBase
 

@@ -14,6 +14,10 @@ def schedule():
         tasks.heartbeat.send,
         CronTrigger.from_crontab("0 0 * * *"),
     )
+    scheduler.add_job(
+        tasks.subscription_reminder.send,
+        CronTrigger.from_crontab("0 0 * * *"),
+    )
     try:
         scheduler.start()
     except KeyboardInterrupt:

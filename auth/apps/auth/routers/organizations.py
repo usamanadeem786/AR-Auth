@@ -267,6 +267,9 @@ async def create_organization_invitation(
     organization_manager: OrganizationManager = Depends(get_organization_manager),
     tenant: Tenant = Depends(get_current_tenant),
     client_repository: ClientRepository = Depends(get_repository(ClientRepository)),
+    organization_subscription_repository: OrganizationSubscriptionRepository = Depends(
+        get_repository(OrganizationSubscriptionRepository)
+    ),
 ):
     """Create invitation - requires invite permission"""
     try:
@@ -276,8 +279,13 @@ async def create_organization_invitation(
         if invitation_create.redirect_uri is not None:
             if not str(invitation_create.redirect_uri) in client.redirect_uris:
                 raise InvalidClientRedirectUriError()
+
+        accounts = await organization_subscription_repository.get_organization_accounts(
+            organization.id
+        )
+
         await organization_manager.create_invitation(
-            request, organization, invitation_create, tenant, client
+            request, accounts, organization, invitation_create, tenant, client
         )
     except (
         InvalidInvitationError,

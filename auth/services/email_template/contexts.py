@@ -73,10 +73,42 @@ class OrganizationInvitationContext(EmailContext):
         return context_kwargs
 
 
+class SubscriptionGracePeriodContext(EmailContext):
+    organization_name: str
+    days_remaining: int
+    payment_url: str
+    subscription_name: str
+    
+    @classmethod
+    async def _get_sample_context_kwargs(cls, session: AsyncSession) -> dict[str, Any]:
+        context_kwargs = await super()._get_sample_context_kwargs(session)
+        context_kwargs["organization_name"] = "Example Organization"
+        context_kwargs["days_remaining"] = 5
+        context_kwargs["payment_url"] = "https://example.auth.dev/billing"
+        context_kwargs["subscription_name"] = "Pro Plan"
+        return context_kwargs
+
+
+class SubscriptionExpiredContext(EmailContext):
+    organization_name: str
+    payment_url: str
+    subscription_name: str
+    
+    @classmethod
+    async def _get_sample_context_kwargs(cls, session: AsyncSession) -> dict[str, Any]:
+        context_kwargs = await super()._get_sample_context_kwargs(session)
+        context_kwargs["organization_name"] = "Example Organization"
+        context_kwargs["payment_url"] = "https://example.auth.dev/billing"
+        context_kwargs["subscription_name"] = "Pro Plan"
+        return context_kwargs
+
+
 EMAIL_TEMPLATE_CONTEXT_CLASS_MAP: dict[EmailTemplateType, type[EmailContext]] = {
     EmailTemplateType.BASE: EmailContext,
     EmailTemplateType.WELCOME: WelcomeContext,
     EmailTemplateType.VERIFY_EMAIL: VerifyEmailContext,
     EmailTemplateType.FORGOT_PASSWORD: ForgotPasswordContext,
     EmailTemplateType.ORGANIZATION_INVITATION: OrganizationInvitationContext,
+    EmailTemplateType.SUBSCRIPTION_GRACE_PERIOD: SubscriptionGracePeriodContext,
+    EmailTemplateType.SUBSCRIPTION_EXPIRED: SubscriptionExpiredContext,
 }

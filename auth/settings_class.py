@@ -140,7 +140,6 @@ class Settings(BaseSettings):
     user_already_exists_cookie_secure: bool = True
     user_already_exists_cookie_lifetime_seconds: int = 60
 
-    organization_max_invitations: int = 10
     organization_invitation_lifetime_seconds: int = 3600 * 24 * 7
 
     invitation_token_cookie_name: str = "auth_invitation_token"

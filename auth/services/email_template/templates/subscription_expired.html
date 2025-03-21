@@ -1,0 +1,26 @@
+{% extends "BASE" %}
+
+{% block preheader %}Your {{ subscription_name }} subscription for {{ organization_name }} has been suspended due to payment issues.{% endblock %}
+
+{% block main %}
+  <h1>Subscription Suspended for {{ organization_name }}</h1>
+  <p>Your {{ subscription_name }} subscription for {{ organization_name }} on {{ tenant.name }} has been suspended due to payment issues.</p>
+  <p>The grace period has ended, and your organization's subscription benefits are now limited. To restore full access, please update your payment information as soon as possible.</p>
+  
+  <table class="body-action" align="center" width="100%" cellpadding="0" cellspacing="0" role="presentation">
+    <tr>
+      <td align="center">
+        <table width="100%" border="0" cellspacing="0" cellpadding="0" role="presentation">
+          <tr>
+            <td align="center">
+              <a href="{{ payment_url }}" class="f-fallback button button--red" target="_blank" rel="noopener noreferrer">Update Payment Method</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+  
+  <p>Once payment is processed, your subscription will be automatically reactivated, and all benefits will be restored immediately.</p>
+  <p>If you need assistance or have any questions, please contact our support team.</p>
+{% endblock %}

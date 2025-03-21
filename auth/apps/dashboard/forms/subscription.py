@@ -1,5 +1,5 @@
 from wtforms import (BooleanField, IntegerField, SelectField, StringField,
-                     TextAreaField, validators)
+                     validators)
 
 from auth.forms import (ComboboxSelectField, ComboboxSelectMultipleField,
                         CSRFBaseForm)
@@ -14,7 +14,7 @@ class BaseSubscriptionForm(CSRFBaseForm):
     accounts = IntegerField(
         "Accounts Limit",
         validators=[validators.InputRequired()],
-        default=1,
+        default=0,
         description="Maximum number of members allowed for organizations with this subscription.",
     )
     stripe_product_id = StringField(
@@ -114,7 +114,7 @@ class OrganizationSubscriptionForm(CSRFBaseForm):
     accounts = IntegerField(
         "Accounts",
         validators=[validators.InputRequired()],
-        default=1,
+        default=0,
     )
     quantity = IntegerField(
         "Quantity",
