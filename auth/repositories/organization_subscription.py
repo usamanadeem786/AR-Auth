@@ -7,6 +7,8 @@ from sqlalchemy.orm import joinedload
 from auth.models.organization import Organization
 from auth.models.organization_subscription import (OrganizationSubscription,
                                                    SubscriptionStatus)
+from auth.models.permission import Permission
+from auth.models.role import Role
 from auth.models.subscription import (Subscription, SubscriptionTier,
                                       SubscriptionTierMode)
 from auth.repositories.base import BaseRepository, UUIDRepositoryMixin
@@ -144,3 +146,24 @@ class OrganizationSubscriptionRepository(
         # Using the same query as get_expired_in_grace_period, but filtering will be done
         # in the caller based on grace_expires_at
         return await self.get_expired_in_grace_period(now)
+
+    async def get_by_organization_with_roles_permissions(
+        self, organization_id: UUID4
+    ) -> list[OrganizationSubscription]:
+        """Get organization subscriptions with preloaded roles and permissions"""
+        statement = (
+            select(self.model)
+            .where(
+                and_(
+                    self.model.organization_id == organization_id,
+                    self.model.roles.any(Role.is_public.is_(True)),
+                    self.model.roles.any(
+                        Role.permissions.any(Permission.is_public.is_(True))
+                    ),
+                )
+            )
+            .options(
+                joinedload(OrganizationSubscription.roles).joinedload(Role.permissions),
+            )
+        )
+        return await self.list(statement)

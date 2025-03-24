@@ -136,3 +136,11 @@ class OrganizationSubscriptionCalculated(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class RolePermission(BaseModel):
+    name: str
+    permissions: list[PermissionInfo] = []
+
+    class Config:
+        from_attributes = True

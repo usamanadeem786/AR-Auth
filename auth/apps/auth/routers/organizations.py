@@ -24,7 +24,8 @@ from auth.services.organization import (
     ORGANIZATION_INVITE_REVOKE_CODENAME, ORGANIZATION_MEMBER_LIST_CODENAME,
     ORGANIZATION_MEMBER_PERMISSION_ADD_CODENAME,
     ORGANIZATION_MEMBER_PERMISSION_REMOVE_CODENAME,
-    ORGANIZATION_MEMBER_REMOVE_CODENAME, ORGANIZATION_UPDATE_CODENAME)
+    ORGANIZATION_MEMBER_REMOVE_CODENAME, ORGANIZATION_PERMISSION_LIST_CODENAME,
+    ORGANIZATION_UPDATE_CODENAME)
 from auth.services.organization_manager import (
     ClientNotFoundError, InvalidClientRedirectUriError, InvalidInvitationError,
     InvitationAlreadyExistsError, InvitationMaxLimitReachedError,
@@ -397,3 +398,43 @@ async def list_organization_subscriptions(
         schemas.organization.OrganizationSubscriptionRead.model_validate(subscription)
         for subscription in subscriptions
     ]
+
+
+@router.get(
+    "/{id:uuid}/permissions",
+    response_model=list[schemas.organization.RolePermission],
+)
+async def list_organization_subscription_permissions(
+    organization: Organization = Depends(
+        require_organization_permission(ORGANIZATION_PERMISSION_LIST_CODENAME)
+    ),
+    user: User = Depends(current_active_user),
+    organization_subscription_repository: OrganizationSubscriptionRepository = Depends(
+        get_repository(OrganizationSubscriptionRepository)
+    ),
+):
+    """List permissions available through organization subscriptions - accessible by any member"""
+
+    # Get all subscriptions for the organization with preloaded public roles and permissions
+    subscriptions = await organization_subscription_repository.get_by_organization_with_roles_permissions(
+        organization.id
+    )
+
+    # Build a list of roles with permissions - the query already filtered for public roles and permissions
+    result = []
+    for subscription in subscriptions:
+        for role in subscription.roles:
+            # Create schema objects directly from the filtered data
+            permissions = [
+                schemas.organization.PermissionInfo.model_validate(permission)
+                for permission in role.permissions
+            ]
+
+            if permissions:
+                result.append(
+                    schemas.organization.RolePermission(
+                        name=role.name, permissions=permissions
+                    )
+                )
+
+    return result

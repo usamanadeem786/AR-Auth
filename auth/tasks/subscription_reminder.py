@@ -40,8 +40,6 @@ class SubscriptionReminderTask(TaskBase):
             # Get all expired subscriptions (some may be in grace period, some may not)
             subscriptions = await repository.get_expired_in_grace_period(now)
 
-            print(f"\n\n\n\nSubscriptions: {subscriptions}")
-
             for subscription in subscriptions:
                 # Check if still in grace period
                 if subscription.grace_expires_at > now:
@@ -58,6 +56,7 @@ class SubscriptionReminderTask(TaskBase):
                             tenant,
                             user,
                             organization.name,
+                            organization.id,
                             days_remaining,
                             subscription.tier.name,
                         )
@@ -67,18 +66,18 @@ class SubscriptionReminderTask(TaskBase):
         tenant: Tenant,
         user: User,
         organization_name: str,
+        organization_id: str,
         days_remaining: int,
         subscription_name: str,
     ):
         """Send grace period email notification"""
-        print(f"\n\n\n\nSending grace period email!")
         # Create context for email
         context = SubscriptionGracePeriodContext(
             tenant=schemas.tenant.Tenant.model_validate(tenant),
             user=schemas.user.UserEmailContext.model_validate(user),
             organization_name=organization_name,
             days_remaining=days_remaining,
-            payment_url=f"{tenant.application_url}/billing",
+            payment_url=f"{tenant.application_url}/billing?organization_id={organization_id}",
             subscription_name=subscription_name,
         )
 
@@ -122,11 +121,20 @@ class SubscriptionReminderTask(TaskBase):
                     await repository.update(subscription)
 
                     await self._send_expiration_email(
-                        tenant, user, organization.name, subscription.tier.name
+                        tenant,
+                        user,
+                        organization.name,
+                        organization.id,
+                        subscription.tier.name,
                     )
 
     async def _send_expiration_email(
-        self, tenant: Tenant, user: User, organization_name: str, subscription_name: str
+        self,
+        tenant: Tenant,
+        user: User,
+        organization_name: str,
+        organization_id: str,
+        subscription_name: str,
     ):
         """Send expiration email notification"""
         # Create context for email
@@ -134,7 +142,7 @@ class SubscriptionReminderTask(TaskBase):
             tenant=schemas.tenant.Tenant.model_validate(tenant),
             user=schemas.user.UserEmailContext.model_validate(user),
             organization_name=organization_name,
-            payment_url=f"{tenant.application_url}/billing",
+            payment_url=f"{tenant.application_url}/billing?organization_id={organization_id}",
             subscription_name=subscription_name,
         )
 
