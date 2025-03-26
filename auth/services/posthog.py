@@ -10,11 +10,11 @@ from auth.repositories.user import UserRepository
 from auth.services.localhost import is_localhost
 from auth.settings import settings
 
-POSTHOG_API_KEY = "__POSTHOG_API_KEY__"
+POSTHOG_API_KEY = settings.posthog_api_key
 
 posthog = Posthog(
     POSTHOG_API_KEY,
-    host="https://eu.posthog.com",
+    host=settings.posthog_host,
     disabled=not settings.telemetry_enabled,
     sync_mode=True,
 )

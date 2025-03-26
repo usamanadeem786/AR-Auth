@@ -30,9 +30,9 @@ class LocaleJinja2Templates(Jinja2Templates):
 
         env.globals["url_path_for"] = url_path_for
         env.globals["get_oauth_provider_branding"] = get_oauth_provider_branding
-        env.globals["posthog_api_key"] = (
-            POSTHOG_API_KEY if settings.telemetry_enabled else None
-        )
+        if settings.telemetry_enabled:
+            env.globals["posthog_host"] = settings.posthog_web_host
+            env.globals["posthog_api_key"] = settings.posthog_api_key
         env.filters["get_column_macro"] = get_column_macro
         env.install_gettext_translations(get_translations(), newstyle=True)
 

@@ -151,6 +151,11 @@ class Settings(BaseSettings):
     stripe_secret_key: str
     stripe_webhook_secret: str | None = None
 
+    # Posthog settings
+    posthog_host: str = "https://us.i.posthog.com"
+    posthog_web_host: str = "https://us.posthog.com"
+    posthog_api_key: str | None = None
+
     model_config = SettingsConfigDict(
         env_file=".env", extra="ignore", secrets_dir=initial_settings.secrets_dir
     )
