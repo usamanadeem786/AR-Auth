@@ -6,24 +6,17 @@ from auth.crypto.access_token import generate_access_token
 from auth.crypto.id_token import generate_id_token
 from auth.crypto.token import generate_token
 from auth.dependencies.logger import get_audit_logger
-from auth.dependencies.permission import (
-    UserPermissionsGetter,
-    get_user_permissions_getter,
-)
+from auth.dependencies.permission import (UserPermissionsGetter,
+                                          get_user_permissions_getter)
 from auth.dependencies.repositories import get_repository
 from auth.dependencies.tenant import get_current_tenant
-from auth.dependencies.token import (
-    GrantRequest,
-    get_user_from_grant_request,
-    validate_grant_request,
-)
+from auth.dependencies.token import (GrantRequest, get_user_from_grant_request,
+                                     validate_grant_request)
 from auth.logger import AuditLogger
 from auth.models import AuditLogMessage, RefreshToken, Tenant, User
-from auth.repositories import (
-    OrganizationMemberRepository,
-    OrganizationSubscriptionRepository,
-    RefreshTokenRepository,
-)
+from auth.repositories import (OrganizationMemberRepository,
+                               OrganizationSubscriptionRepository,
+                               RefreshTokenRepository)
 from auth.schemas.auth import TokenResponse
 
 router = APIRouter()

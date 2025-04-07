@@ -1,9 +1,9 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from enum import StrEnum
 
 from pydantic import UUID4
 from sqlalchemy import (Column, ColumnElement, Enum, ForeignKey, Integer,
-                        String, Table, UniqueConstraint)
+                        String, Table, UniqueConstraint, func)
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -105,12 +105,13 @@ class OrganizationSubscription(UUIDModel, CreatedUpdatedAt, Base):
         """Calculate when the grace period expires"""
         if not self.expires_at:
             return None
-        return self.expires_at + timedelta(days=self.grace_period)
+        return self.expires_at + func.make_interval(0, 0, 0, self.grace_period)
 
     @grace_expires_at.inplace.expression
     @classmethod
-    def _grace_expires_at_expression(cls) -> ColumnElement[bool]:
-        return cls.expires_at + timedelta(days=cls.grace_period)
+    def _grace_expires_at_expression(cls) -> ColumnElement[datetime]:
+        """SQL expression for grace_expires_at"""
+        return cls.expires_at + func.make_interval(0, 0, 0, cls.grace_period)
 
     @property
     def is_active(self) -> bool:
