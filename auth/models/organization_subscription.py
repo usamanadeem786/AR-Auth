@@ -4,6 +4,7 @@ from enum import StrEnum
 from pydantic import UUID4
 from sqlalchemy import (Column, Enum, ForeignKey, Integer, String, Table,
                         UniqueConstraint)
+from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from auth.models.base import TABLE_PREFIX, Base, get_prefixed_tablename
@@ -99,7 +100,7 @@ class OrganizationSubscription(UUIDModel, CreatedUpdatedAt, Base):
         "Role", secondary=OrganizationSubscriptionRole, lazy="selectin"
     )
 
-    @property
+    @hybrid_property
     def grace_expires_at(self) -> datetime:
         """Calculate when the grace period expires"""
         if not self.expires_at:

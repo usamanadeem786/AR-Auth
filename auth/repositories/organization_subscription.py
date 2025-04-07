@@ -1,4 +1,4 @@
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 
 from pydantic import UUID4
 from sqlalchemy import and_, func, select
@@ -38,9 +38,7 @@ class OrganizationSubscriptionRepository(
             .where(
                 OrganizationSubscription.organization_id == organization_id,
                 OrganizationSubscription.status == SubscriptionStatus.ACTIVE,
-                OrganizationSubscription.expires_at
-                + timedelta(days=OrganizationSubscription.grace_period)
-                > now,
+                OrganizationSubscription.grace_expires_at > now,
             )
             .options(
                 joinedload(OrganizationSubscription.tier),
