@@ -1,0 +1,29 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy poetry files
+COPY pyproject.toml poetry.lock ./
+
+# Install poetry
+RUN pip install poetry
+
+# Configure poetry to create virtualenv in project directory
+RUN poetry config virtualenvs.create false
+
+# Install dependencies
+RUN poetry install --no-dev --no-interaction --no-ansi
+
+# Copy application code
+COPY . .
+
+# Compile translations
+RUN poetry run pybabel compile --domain=messages --directory=auth/locale
+
+# Run the worker
+CMD ["poetry", "run", "dramatiq", "auth.worker", "-p", "1", "-t", "1", "-f", "auth.scheduler:schedule"]

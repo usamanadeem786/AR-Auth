@@ -1,0 +1,4210 @@
+
+{
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Auth Authentication API",
+      "version": "0.29.2"
+    },
+    "paths": {
+      "/api/token": {
+        "post": {
+          "summary": "Auth:Token",
+          "operationId": "auth_token_api_token_post",
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_auth_token_api_token_post"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "client_secret_basic": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/userinfo": {
+        "get": {
+          "summary": "User:Userinfo",
+          "description": "OpenID specification requires the /userinfo endpoint\nto be available both with GET and POST methods 🤷‍♂️\nhttps://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest",
+          "operationId": "user_userinfo_api_userinfo_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        },
+        "post": {
+          "summary": "User:Userinfo",
+          "description": "OpenID specification requires the /userinfo endpoint\nto be available both with GET and POST methods 🤷‍♂️\nhttps://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest",
+          "operationId": "user_userinfo_api_userinfo_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/profile": {
+        "patch": {
+          "summary": "User:Profile.Patch",
+          "operationId": "user_profile_patch_api_profile_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$defs": {
+                    "UserFields": {
+                      "properties": {
+  
+                      },
+                      "type": "object",
+                      "title": "UserFields"
+                    }
+                  },
+                  "properties": {
+                    "fields": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/paths/~1api~1profile/patch/requestBody/content/application~1json/schema/definitions/UserFields"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "title": "UserUpdate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/password": {
+        "patch": {
+          "summary": "User:Password",
+          "operationId": "user_password_api_password_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChangePassword"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/email/change": {
+        "patch": {
+          "summary": "User:Email Change",
+          "operationId": "user_email_change_api_email_change_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChangeEmail"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "202": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/email/verify": {
+        "post": {
+          "summary": "User:Email Verify",
+          "operationId": "user_email_verify_api_email_verify_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserVerifyEmail"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/.well-known/openid-configuration": {
+        "get": {
+          "summary": "Well Known:Openid Configuration",
+          "operationId": "well_known_openid_configuration__well_known_openid_configuration_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/.well-known/jwks.json": {
+        "get": {
+          "summary": "Well Known:Jwks",
+          "operationId": "well_known_jwks__well_known_jwks_json_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organizations",
+          "description": "List organizations where user is a member",
+          "operationId": "list_organizations_api_organizations_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_Organization_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Create Organization",
+          "description": "Create new organization - any authenticated user can create",
+          "operationId": "create_organization_api_organizations_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Get Organization",
+          "description": "Get organization details - accessible by any member",
+          "operationId": "get_organization_api_organizations__id__get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "patch": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Update Organization",
+          "description": "Update organization - requires update permission",
+          "operationId": "update_organization_api_organizations__id__patch",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Delete Organization",
+          "description": "Delete organization - requires delete permission",
+          "operationId": "delete_organization_api_organizations__id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/members": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Members",
+          "description": "List organization members - requires membership",
+          "operationId": "list_organization_members_api_organizations__id__members_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            },
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_OrganizationMember_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/members/{user_id}": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Remove Organization Member",
+          "description": "Remove member from organization - requires member management permission",
+          "operationId": "remove_organization_member_api_organizations__id__members__user_id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/members/{user_id}/permissions": {
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Add Member Permission",
+          "description": "Add permission to member - requires permission management permission",
+          "operationId": "add_member_permission_api_organizations__id__members__user_id__permissions_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationMemberPermissionCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/members/{user_id}/permissions/{permission_id}": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Remove Member Permission",
+          "description": "Remove permission from member - requires permission management permission",
+          "operationId": "remove_member_permission_api_organizations__id__members__user_id__permissions__permission_id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "permission_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Permission Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/invitations": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Invitations",
+          "description": "List organization invitations - requires membership",
+          "operationId": "list_organization_invitations_api_organizations__id__invitations_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            },
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_OrganizationInvitation_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Create Organization Invitation",
+          "description": "Create invitation - requires invite permission",
+          "operationId": "create_organization_invitation_api_organizations__id__invitations_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationInvitationCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrganizationInvitationRead"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/invitations/{invitation_id}/revoke": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Revoke Organization Invitation",
+          "description": "Revoke invitation - requires invite management permission",
+          "operationId": "revoke_organization_invitation_api_organizations__id__invitations__invitation_id__revoke_delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "invitation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Invitation Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/invitations/{invitation_id}/resend": {
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Resend Organization Invitation",
+          "description": "Resend invitation - requires invite management permission",
+          "operationId": "resend_organization_invitation_api_organizations__id__invitations__invitation_id__resend_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "invitation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Invitation Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/subscriptions": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Subscriptions",
+          "description": "List organization subscriptions - accessible by any member",
+          "operationId": "list_organization_subscriptions_api_organizations__id__subscriptions_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrganizationSubscriptionRead"
+                    },
+                    "title": "Response List Organization Subscriptions Api Organizations  Id  Subscriptions Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/organizations/{id}/permissions": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Subscription Permissions",
+          "description": "List permissions available through organization subscriptions - accessible by any member",
+          "operationId": "list_organization_subscription_permissions_api_organizations__id__permissions_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RolePermission"
+                    },
+                    "title": "Response List Organization Subscription Permissions Api Organizations  Id  Permissions Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/subscriptions": {
+        "get": {
+          "tags": [
+            "subscription"
+          ],
+          "summary": "List Subscriptions",
+          "description": "List subscriptions with their tiers - requires authentication",
+          "operationId": "list_subscriptions_api_subscriptions_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/SubscriptionWithTiers"
+                    },
+                    "type": "array",
+                    "title": "Response List Subscriptions Api Subscriptions Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/api/billing/organizations/{id}/portal": {
+        "post": {
+          "tags": [
+            "billing"
+          ],
+          "summary": "Create Organization Customer Portal Session",
+          "description": "Create a Customer Portal session for an organization.",
+          "operationId": "create_organization_customer_portal_session_api_billing_organizations__id__portal_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPortalRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerPortalResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/billing/organizations/{id}/checkout": {
+        "post": {
+          "tags": [
+            "billing"
+          ],
+          "summary": "Create Organization Checkout Session",
+          "description": "Create a checkout session for an organization subscription.",
+          "operationId": "create_organization_checkout_session_api_billing_organizations__id__checkout_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSessionRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CheckoutSessionResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/api/billing/webhook": {
+        "post": {
+          "tags": [
+            "webhook"
+          ],
+          "summary": "Payment Webhook",
+          "description": "Handle payment provider webhook events.",
+          "operationId": "payment_webhook_api_billing_webhook_post",
+          "parameters": [
+            {
+              "name": "Stripe-Signature",
+              "in": "header",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "title": "Stripe-Signature"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/token": {
+        "post": {
+          "summary": "Auth:Token",
+          "operationId": "auth_token__tenant_slug__api_token_post",
+          "requestBody": {
+            "content": {
+              "application/x-www-form-urlencoded": {
+                "schema": {
+                  "$ref": "#/components/schemas/Body_auth_token__tenant_slug__api_token_post"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "client_secret_basic": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/userinfo": {
+        "get": {
+          "summary": "User:Userinfo",
+          "description": "OpenID specification requires the /userinfo endpoint\nto be available both with GET and POST methods 🤷‍♂️\nhttps://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest",
+          "operationId": "user_userinfo__tenant_slug__api_userinfo_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        },
+        "post": {
+          "summary": "User:Userinfo",
+          "description": "OpenID specification requires the /userinfo endpoint\nto be available both with GET and POST methods 🤷‍♂️\nhttps://openid.net/specs/openid-connect-core-1_0.html#UserInfoRequest",
+          "operationId": "user_userinfo__tenant_slug__api_userinfo_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/profile": {
+        "patch": {
+          "summary": "User:Profile.Patch",
+          "operationId": "user_profile_patch__tenant_slug__api_profile_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$defs": {
+                    "UserFields": {
+                      "properties": {
+  
+                      },
+                      "type": "object",
+                      "title": "UserFields"
+                    }
+                  },
+                  "properties": {
+                    "fields": {
+                      "anyOf": [
+                        {
+                          "$ref": "#/paths/~1api~1profile/patch/requestBody/content/application~1json/schema/definitions/UserFields"
+                        },
+                        {
+                          "type": "null"
+                        }
+                      ]
+                    }
+                  },
+                  "type": "object",
+                  "title": "UserUpdate"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/password": {
+        "patch": {
+          "summary": "User:Password",
+          "operationId": "user_password__tenant_slug__api_password_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChangePassword"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/email/change": {
+        "patch": {
+          "summary": "User:Email Change",
+          "operationId": "user_email_change__tenant_slug__api_email_change_patch",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserChangeEmail"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "202": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/email/verify": {
+        "post": {
+          "summary": "User:Email Verify",
+          "operationId": "user_email_verify__tenant_slug__api_email_verify_post",
+          "requestBody": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserVerifyEmail"
+                }
+              }
+            },
+            "required": true
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/.well-known/openid-configuration": {
+        "get": {
+          "summary": "Well Known:Openid Configuration",
+          "operationId": "well_known_openid_configuration__tenant_slug___well_known_openid_configuration_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/.well-known/jwks.json": {
+        "get": {
+          "summary": "Well Known:Jwks",
+          "operationId": "well_known_jwks__tenant_slug___well_known_jwks_json_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organizations",
+          "description": "List organizations where user is a member",
+          "operationId": "list_organizations__tenant_slug__api_organizations_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_Organization_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Create Organization",
+          "description": "Create new organization - any authenticated user can create",
+          "operationId": "create_organization__tenant_slug__api_organizations_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Get Organization",
+          "description": "Get organization details - accessible by any member",
+          "operationId": "get_organization__tenant_slug__api_organizations__id__get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "patch": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Update Organization",
+          "description": "Update organization - requires update permission",
+          "operationId": "update_organization__tenant_slug__api_organizations__id__patch",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationUpdate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Organization"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Delete Organization",
+          "description": "Delete organization - requires delete permission",
+          "operationId": "delete_organization__tenant_slug__api_organizations__id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/members": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Members",
+          "description": "List organization members - requires membership",
+          "operationId": "list_organization_members__tenant_slug__api_organizations__id__members_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            },
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_OrganizationMember_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/members/{user_id}": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Remove Organization Member",
+          "description": "Remove member from organization - requires member management permission",
+          "operationId": "remove_organization_member__tenant_slug__api_organizations__id__members__user_id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/members/{user_id}/permissions": {
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Add Member Permission",
+          "description": "Add permission to member - requires permission management permission",
+          "operationId": "add_member_permission__tenant_slug__api_organizations__id__members__user_id__permissions_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationMemberPermissionCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/members/{user_id}/permissions/{permission_id}": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Remove Member Permission",
+          "description": "Remove permission from member - requires permission management permission",
+          "operationId": "remove_member_permission__tenant_slug__api_organizations__id__members__user_id__permissions__permission_id__delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "user_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "User Id"
+              }
+            },
+            {
+              "name": "permission_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Permission Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/invitations": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Invitations",
+          "description": "List organization invitations - requires membership",
+          "operationId": "list_organization_invitations__tenant_slug__api_organizations__id__invitations_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            },
+            {
+              "name": "query",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ],
+                "title": "Query"
+              }
+            },
+            {
+              "name": "limit",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 10,
+                "title": "Limit"
+              }
+            },
+            {
+              "name": "skip",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "integer",
+                "minimum": 0,
+                "default": 0,
+                "title": "Skip"
+              }
+            },
+            {
+              "name": "ordering",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "string",
+                "title": "Ordering"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/PaginatedResults_OrganizationInvitation_"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Create Organization Invitation",
+          "description": "Create invitation - requires invite permission",
+          "operationId": "create_organization_invitation__tenant_slug__api_organizations__id__invitations_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OrganizationInvitationCreate"
+                }
+              }
+            }
+          },
+          "responses": {
+            "201": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/OrganizationInvitationRead"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/invitations/{invitation_id}/revoke": {
+        "delete": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Revoke Organization Invitation",
+          "description": "Revoke invitation - requires invite management permission",
+          "operationId": "revoke_organization_invitation__tenant_slug__api_organizations__id__invitations__invitation_id__revoke_delete",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "invitation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Invitation Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "204": {
+              "description": "Successful Response"
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/invitations/{invitation_id}/resend": {
+        "post": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "Resend Organization Invitation",
+          "description": "Resend invitation - requires invite management permission",
+          "operationId": "resend_organization_invitation__tenant_slug__api_organizations__id__invitations__invitation_id__resend_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "invitation_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Invitation Id"
+              }
+            },
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+  
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/subscriptions": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Subscriptions",
+          "description": "List organization subscriptions - accessible by any member",
+          "operationId": "list_organization_subscriptions__tenant_slug__api_organizations__id__subscriptions_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/OrganizationSubscriptionRead"
+                    },
+                    "title": "Response List Organization Subscriptions  Tenant Slug  Api Organizations  Id  Subscriptions Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/organizations/{id}/permissions": {
+        "get": {
+          "tags": [
+            "organizations"
+          ],
+          "summary": "List Organization Subscription Permissions",
+          "description": "List permissions available through organization subscriptions - accessible by any member",
+          "operationId": "list_organization_subscription_permissions__tenant_slug__api_organizations__id__permissions_get",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "array",
+                    "items": {
+                      "$ref": "#/components/schemas/RolePermission"
+                    },
+                    "title": "Response List Organization Subscription Permissions  Tenant Slug  Api Organizations  Id  Permissions Get"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/subscriptions": {
+        "get": {
+          "tags": [
+            "subscription"
+          ],
+          "summary": "List Subscriptions",
+          "description": "List subscriptions with their tiers - requires authentication",
+          "operationId": "list_subscriptions__tenant_slug__api_subscriptions_get",
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "items": {
+                      "$ref": "#/components/schemas/SubscriptionWithTiers"
+                    },
+                    "type": "array",
+                    "title": "Response List Subscriptions  Tenant Slug  Api Subscriptions Get"
+                  }
+                }
+              }
+            }
+          },
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ]
+        }
+      },
+      "/{tenant_slug}/api/billing/organizations/{id}/portal": {
+        "post": {
+          "tags": [
+            "billing"
+          ],
+          "summary": "Create Organization Customer Portal Session",
+          "description": "Create a Customer Portal session for an organization.",
+          "operationId": "create_organization_customer_portal_session__tenant_slug__api_billing_organizations__id__portal_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CustomerPortalRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CustomerPortalResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/{tenant_slug}/api/billing/organizations/{id}/checkout": {
+        "post": {
+          "tags": [
+            "billing"
+          ],
+          "summary": "Create Organization Checkout Session",
+          "description": "Create a checkout session for an organization subscription.",
+          "operationId": "create_organization_checkout_session__tenant_slug__api_billing_organizations__id__checkout_post",
+          "security": [
+            {
+              "OAuth2AuthorizationCodeBearer": []
+            },
+            {
+              "APIKeyCookie": []
+            },
+            {
+              "HTTPBearer": []
+            }
+          ],
+          "parameters": [
+            {
+              "name": "id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "format": "uuid4",
+                "title": "Id"
+              }
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CheckoutSessionRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Successful Response",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/CheckoutSessionResponse"
+                  }
+                }
+              }
+            },
+            "422": {
+              "description": "Validation Error",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/HTTPValidationError"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "components": {
+      "schemas": {
+        "Body_auth_token__tenant_slug__api_token_post": {
+          "properties": {
+            "organization_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid4"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Organization Id"
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            },
+            "code_verifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code Verifier"
+            },
+            "redirect_uri": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Redirect Uri"
+            },
+            "refresh_token_token": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Refresh Token Token"
+            },
+            "scope": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope"
+            },
+            "grant_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grant Type"
+            },
+            "client_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Id"
+            },
+            "client_secret": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Secret"
+            }
+          },
+          "type": "object",
+          "title": "Body_auth_token__tenant_slug__api_token_post"
+        },
+        "Body_auth_token_api_token_post": {
+          "properties": {
+            "organization_id": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "format": "uuid4"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Organization Id"
+            },
+            "code": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code"
+            },
+            "code_verifier": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Code Verifier"
+            },
+            "redirect_uri": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Redirect Uri"
+            },
+            "refresh_token_token": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Refresh Token Token"
+            },
+            "scope": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Scope"
+            },
+            "grant_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Grant Type"
+            },
+            "client_id": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Id"
+            },
+            "client_secret": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Client Secret"
+            }
+          },
+          "type": "object",
+          "title": "Body_auth_token_api_token_post"
+        },
+        "CheckoutSessionRequest": {
+          "properties": {
+            "price_id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Price Id"
+            },
+            "success_url": {
+              "type": "string",
+              "title": "Success Url",
+              "default": "http://localhost:8000/success?session_id={CHECKOUT_SESSION_ID}"
+            },
+            "cancel_url": {
+              "type": "string",
+              "title": "Cancel Url",
+              "default": "http://localhost:8000/cancel"
+            }
+          },
+          "type": "object",
+          "required": [
+            "price_id"
+          ],
+          "title": "CheckoutSessionRequest"
+        },
+        "CheckoutSessionResponse": {
+          "properties": {
+            "url": {
+              "type": "string",
+              "title": "Url"
+            }
+          },
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "title": "CheckoutSessionResponse"
+        },
+        "CustomerPortalRequest": {
+          "properties": {
+            "return_url": {
+              "type": "string",
+              "title": "Return Url",
+              "default": "http://localhost:8000/account"
+            }
+          },
+          "type": "object",
+          "title": "CustomerPortalRequest"
+        },
+        "CustomerPortalResponse": {
+          "properties": {
+            "url": {
+              "type": "string",
+              "title": "Url"
+            }
+          },
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "title": "CustomerPortalResponse"
+        },
+        "HTTPValidationError": {
+          "properties": {
+            "detail": {
+              "items": {
+                "$ref": "#/components/schemas/ValidationError"
+              },
+              "type": "array",
+              "title": "Detail"
+            }
+          },
+          "type": "object",
+          "title": "HTTPValidationError"
+        },
+        "Organization": {
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            }
+          },
+          "type": "object",
+          "required": [
+            "created_at",
+            "updated_at",
+            "id",
+            "name"
+          ],
+          "title": "Organization"
+        },
+        "OrganizationCreate": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "title": "OrganizationCreate"
+        },
+        "OrganizationInvitation": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "role": {
+              "$ref": "#/components/schemas/OrganizationRole"
+            },
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Expires At"
+            },
+            "is_expired": {
+              "type": "boolean",
+              "title": "Is Expired"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "role",
+            "created_at",
+            "updated_at",
+            "id",
+            "expires_at",
+            "is_expired"
+          ],
+          "title": "OrganizationInvitation"
+        },
+        "OrganizationInvitationCreate": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "role": {
+              "$ref": "#/components/schemas/OrganizationRole"
+            },
+            "permissions": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string",
+                    "format": "uuid4"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Permissions"
+            },
+            "client_id": {
+              "type": "string",
+              "maxLength": 255,
+              "minLength": 32,
+              "title": "Client Id"
+            },
+            "redirect_uri": {
+              "anyOf": [
+                {
+                  "type": "string",
+                  "maxLength": 2083,
+                  "minLength": 1,
+                  "format": "uri"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Redirect Uri"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "role",
+            "client_id"
+          ],
+          "title": "OrganizationInvitationCreate"
+        },
+        "OrganizationInvitationRead": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            },
+            "role": {
+              "$ref": "#/components/schemas/OrganizationRole"
+            },
+            "permissions": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/PermissionInfo"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Permissions"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email",
+            "role"
+          ],
+          "title": "OrganizationInvitationRead"
+        },
+        "OrganizationMember": {
+          "properties": {
+            "created_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Created At"
+            },
+            "updated_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Updated At"
+            },
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "user_id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "User Id"
+            },
+            "organization_id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Organization Id"
+            },
+            "permissions": {
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/PermissionInfo"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Permissions"
+            },
+            "user": {
+              "$ref": "#/components/schemas/UserInfo"
+            },
+            "role": {
+              "$ref": "#/components/schemas/OrganizationRole"
+            }
+          },
+          "type": "object",
+          "required": [
+            "created_at",
+            "updated_at",
+            "id",
+            "user_id",
+            "organization_id",
+            "user",
+            "role"
+          ],
+          "title": "OrganizationMember"
+        },
+        "OrganizationMemberPermissionCreate": {
+          "properties": {
+            "permission_id": {
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string",
+                    "format": "uuid4"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Permission Id"
+            }
+          },
+          "type": "object",
+          "title": "OrganizationMemberPermissionCreate"
+        },
+        "OrganizationRole": {
+          "type": "string",
+          "enum": [
+            "owner",
+            "admin",
+            "member"
+          ],
+          "title": "OrganizationRole"
+        },
+        "OrganizationSubscriptionRead": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "accounts": {
+              "type": "integer",
+              "title": "Accounts"
+            },
+            "expires_at": {
+              "type": "string",
+              "format": "date-time",
+              "title": "Expires At"
+            },
+            "grace_period": {
+              "type": "integer",
+              "title": "Grace Period"
+            },
+            "quantity": {
+              "type": "integer",
+              "title": "Quantity"
+            },
+            "interval": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/SubscriptionInterval"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "interval_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Interval Count"
+            },
+            "status": {
+              "$ref": "#/components/schemas/SubscriptionStatus"
+            },
+            "is_active": {
+              "type": "boolean",
+              "title": "Is Active"
+            },
+            "is_in_grace_period": {
+              "type": "boolean",
+              "title": "Is In Grace Period"
+            },
+            "days_until_expiry": {
+              "type": "integer",
+              "title": "Days Until Expiry"
+            },
+            "days_until_grace_period_ends": {
+              "type": "integer",
+              "title": "Days Until Grace Period Ends"
+            },
+            "tier": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/TierInfoRead"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "accounts",
+            "expires_at",
+            "grace_period",
+            "quantity",
+            "interval",
+            "interval_count",
+            "status",
+            "is_active",
+            "is_in_grace_period",
+            "days_until_expiry",
+            "days_until_grace_period_ends"
+          ],
+          "title": "OrganizationSubscriptionRead"
+        },
+        "OrganizationUpdate": {
+          "properties": {
+            "name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Name"
+            },
+            "description": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Description"
+            }
+          },
+          "type": "object",
+          "title": "OrganizationUpdate"
+        },
+        "PaginatedResults_OrganizationInvitation_": {
+          "properties": {
+            "count": {
+              "type": "integer",
+              "title": "Count"
+            },
+            "results": {
+              "items": {
+                "$ref": "#/components/schemas/OrganizationInvitation"
+              },
+              "type": "array",
+              "title": "Results"
+            }
+          },
+          "type": "object",
+          "required": [
+            "count",
+            "results"
+          ],
+          "title": "PaginatedResults[OrganizationInvitation]"
+        },
+        "PaginatedResults_OrganizationMember_": {
+          "properties": {
+            "count": {
+              "type": "integer",
+              "title": "Count"
+            },
+            "results": {
+              "items": {
+                "$ref": "#/components/schemas/OrganizationMember"
+              },
+              "type": "array",
+              "title": "Results"
+            }
+          },
+          "type": "object",
+          "required": [
+            "count",
+            "results"
+          ],
+          "title": "PaginatedResults[OrganizationMember]"
+        },
+        "PaginatedResults_Organization_": {
+          "properties": {
+            "count": {
+              "type": "integer",
+              "title": "Count"
+            },
+            "results": {
+              "items": {
+                "$ref": "#/components/schemas/Organization"
+              },
+              "type": "array",
+              "title": "Results"
+            }
+          },
+          "type": "object",
+          "required": [
+            "count",
+            "results"
+          ],
+          "title": "PaginatedResults[Organization]"
+        },
+        "PermissionInfo": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "name": {
+              "type": "string",
+              "title": "Name"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name"
+          ],
+          "title": "PermissionInfo"
+        },
+        "RolePermission": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "permissions": {
+              "items": {
+                "$ref": "#/components/schemas/PermissionInfo"
+              },
+              "type": "array",
+              "title": "Permissions",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "name"
+          ],
+          "title": "RolePermission"
+        },
+        "SubscriptionInfoRead": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "accounts": {
+              "type": "integer",
+              "title": "Accounts"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "accounts"
+          ],
+          "title": "SubscriptionInfoRead"
+        },
+        "SubscriptionInterval": {
+          "type": "string",
+          "enum": [
+            "day",
+            "month",
+            "year"
+          ],
+          "title": "SubscriptionInterval"
+        },
+        "SubscriptionStatus": {
+          "type": "string",
+          "enum": [
+            "pending",
+            "active",
+            "past_due",
+            "canceled",
+            "trialing",
+            "expired"
+          ],
+          "title": "SubscriptionStatus"
+        },
+        "SubscriptionTierMode": {
+          "type": "string",
+          "enum": [
+            "recurring",
+            "one-time"
+          ],
+          "title": "SubscriptionTierMode"
+        },
+        "SubscriptionTierType": {
+          "type": "string",
+          "enum": [
+            "primary",
+            "add-on"
+          ],
+          "title": "SubscriptionTierType"
+        },
+        "SubscriptionWithTiers": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "accounts": {
+              "type": "integer",
+              "title": "Accounts"
+            },
+            "tiers": {
+              "items": {
+                "$ref": "#/components/schemas/TierRead"
+              },
+              "type": "array",
+              "title": "Tiers",
+              "default": []
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "accounts"
+          ],
+          "title": "SubscriptionWithTiers"
+        },
+        "TierInfoRead": {
+          "properties": {
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "subscription": {
+              "$ref": "#/components/schemas/SubscriptionInfoRead"
+            }
+          },
+          "type": "object",
+          "required": [
+            "name",
+            "subscription"
+          ],
+          "title": "TierInfoRead"
+        },
+        "TierRead": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "name": {
+              "type": "string",
+              "title": "Name"
+            },
+            "mode": {
+              "$ref": "#/components/schemas/SubscriptionTierMode"
+            },
+            "type": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/SubscriptionTierType"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "quantity": {
+              "type": "integer",
+              "title": "Quantity"
+            },
+            "interval": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/SubscriptionInterval"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "interval_count": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Interval Count"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "name",
+            "mode",
+            "quantity"
+          ],
+          "title": "TierRead"
+        },
+        "UserChangeEmail": {
+          "properties": {
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            }
+          },
+          "type": "object",
+          "required": [
+            "email"
+          ],
+          "title": "UserChangeEmail"
+        },
+        "UserChangePassword": {
+          "properties": {
+            "password": {
+              "type": "string",
+              "format": "password",
+              "title": "Password",
+              "writeOnly": true
+            }
+          },
+          "type": "object",
+          "required": [
+            "password"
+          ],
+          "title": "UserChangePassword"
+        },
+        "UserInfo": {
+          "properties": {
+            "id": {
+              "type": "string",
+              "format": "uuid4",
+              "title": "Id"
+            },
+            "email": {
+              "type": "string",
+              "format": "email",
+              "title": "Email"
+            }
+          },
+          "type": "object",
+          "required": [
+            "id",
+            "email"
+          ],
+          "title": "UserInfo"
+        },
+        "UserVerifyEmail": {
+          "properties": {
+            "code": {
+              "type": "string",
+              "format": "password",
+              "title": "Code",
+              "writeOnly": true
+            }
+          },
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "title": "UserVerifyEmail"
+        },
+        "ValidationError": {
+          "properties": {
+            "loc": {
+              "items": {
+                "anyOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "integer"
+                  }
+                ]
+              },
+              "type": "array",
+              "title": "Location"
+            },
+            "msg": {
+              "type": "string",
+              "title": "Message"
+            },
+            "type": {
+              "type": "string",
+              "title": "Error Type"
+            }
+          },
+          "type": "object",
+          "required": [
+            "loc",
+            "msg",
+            "type"
+          ],
+          "title": "ValidationError"
+        }
+      },
+      "securitySchemes": {
+        "client_secret_basic": {
+          "type": "http",
+          "scheme": "basic"
+        },
+        "APIKeyCookie": {
+          "type": "apiKey",
+          "in": "cookie",
+          "name": "auth_admin_session"
+        },
+        "HTTPBearer": {
+          "type": "http",
+          "scheme": "bearer"
+        },
+        "OAuth2AuthorizationCodeBearer": {
+          "type": "oauth2",
+          "flows": {
+            "authorizationCode": {
+              "refreshUrl": "/api/token",
+              "scopes": {
+                "openid": "openid"
+              },
+              "authorizationUrl": "/authorize",
+              "tokenUrl": "/api/token"
+            }
+          }
+        }
+      }
+    }
+  }
+  
